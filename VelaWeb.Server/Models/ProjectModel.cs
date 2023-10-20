@@ -243,7 +243,7 @@ namespace VelaWeb.Server.Models
                 this.Status = "正在上传文件...";
                 await projectBuildInfoOutput.OutputBuildInfoAsync(this, "正在计算需要上传的文件...", false);
 
-                using var taskWorker = new TaskWorker(this.Guid);
+                using var taskWorker = new TaskWorker(this.Guid,buildingManager);
                 buildingManager.AddWorker( this.Guid, taskWorker);
 
                 var runRet = await Global.ServiceProvider.GetRequiredService<IUploader>().Upload(this, outputDir, cols, rows, taskWorker.CancellationToken, async (path, data, percent) =>

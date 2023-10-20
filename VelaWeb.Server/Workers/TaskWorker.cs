@@ -6,13 +6,15 @@ namespace VelaWeb.Server.Workers
     {
         CancellationTokenSource _tokenSource;
         private readonly string _guid;
+        private readonly BuildingManager _buildingManager;
 
         public CancellationToken CancellationToken { get; }
-        public TaskWorker(string guid)
+        public TaskWorker(string guid,BuildingManager buildingManager)
         {
             _tokenSource = new CancellationTokenSource();
             CancellationToken = _tokenSource.Token;
             _guid = guid;
+            _buildingManager = buildingManager;
         }
         public async Task Kill()
         {
@@ -21,7 +23,7 @@ namespace VelaWeb.Server.Workers
 
         public void Dispose()
         {
-            Global.ServiceProvider.GetRequiredService<BuildingManager>().RemoveWorker(_guid, this);
+            _buildingManager.RemoveWorker(_guid, this);
             _tokenSource.Dispose();
         }
     }
