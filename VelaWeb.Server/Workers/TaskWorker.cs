@@ -1,6 +1,6 @@
 ﻿using VelaLib;
 
-namespace VelaWeb.Server.Infrastructures
+namespace VelaWeb.Server.Workers
 {
     public class TaskWorker : IWorker, IDisposable
     {

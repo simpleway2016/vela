@@ -17,6 +17,7 @@ using Way.Lib;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using VelaWeb.Server.Git;
+using VelaWeb.Server.Workers;
 
 namespace VelaWeb.Server.Models
 {
