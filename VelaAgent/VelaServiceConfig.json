@@ -1,0 +1,6 @@
+{
+  "ServiceName": "vela-agent",
+  "Description": "Vela Agent Service",
+  "ExecStart": "./VelaAgent",
+  "Kill" :  -9
+}

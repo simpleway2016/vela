@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+	  <ServerGarbageCollection>false</ServerGarbageCollection>
+    <UserSecretsId>0d102c31-dff7-457b-9a64-3e1ff3afd75d</UserSecretsId>
+	  <NoWarn>$(NoWarn);NU1605</NoWarn>
+	  <Version>2.2.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="VelaServiceConfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="VelaServiceConfig.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="JMS.FileUploader.AspNetCore" Version="1.0.2" />
+    <PackageReference Include="Docker.DotNet" Version="3.125.15" />
+    <PackageReference Include="JMS.Common" Version="3.3.3" />
+    <PackageReference Include="System.Management" Version="7.0.2" />
+    <PackageReference Include="Way.EntityDB" Version="6.1.9" />
+  </ItemGroup>
+
+	<ItemGroup Condition=" '$(RuntimeIdentifier)' == 'linux-x64' ">
+		<None Update="libtty.so">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	<ItemGroup Condition=" '$(RuntimeIdentifier)' == 'osx-x64' ">
+		<None Update="libtty.a">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VelaLib\VelaLib.csproj" />
+    <ProjectReference Include="..\VelaService\VelaService.csproj" />
+  </ItemGroup>
+
+	
+</Project>

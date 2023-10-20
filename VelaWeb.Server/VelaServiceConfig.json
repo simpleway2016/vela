@@ -1,0 +1,6 @@
+{
+  "ServiceName": "vela-web",
+  "Description": "Vela Web Server",
+  "ExecStart": "./VelaWeb.Server",
+  "Kill": -9
+}
