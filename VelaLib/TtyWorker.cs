@@ -211,7 +211,8 @@ namespace VelaLib
 
                 if (!_isWindows)
                 {
-                    var text = commandtext.Replace(@"\", @"\\").Replace("\"", "\\\"");
+                    //echo -e "\\\\"  =>最终只会输出一个斜杠
+                    var text = commandtext.Replace(@"\", @"\\\\").Replace("\"", "\\\"");
                     this.SendCommand($"echo -e \"\\x1b[38;5;51m{text}\\x1b[0m\"");
                 }
 
