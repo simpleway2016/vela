@@ -43,17 +43,15 @@ namespace VelaAgent.AutoRun
             if (Directory.Exists(backupFolder) == false)
                 return;
 
-            var dirs = Directory.GetDirectories(backupFolder).OrderBy(m=>m).Skip(5).ToArray();
+            var folderObjects = Directory.GetDirectories(backupFolder).Select(m=>new BackupFolder(m)).OrderByDescending(m=>m.Time).Skip(5).ToArray();
 
-            foreach ( var subDir in dirs)
+            foreach ( var folderObj in folderObjects)
             {
                 try
-                {
-                    var folderName = Path.GetFileName(subDir);
-                    var time = DateTimeOffset.FromUnixTimeMilliseconds( long.Parse(folderName)).UtcDateTime;
-                    if( (DateTime.UtcNow - time).TotalDays > 5)
+                {                 
+                    if( (DateTime.UtcNow - folderObj.Time).TotalDays > 5)
                     {
-                        SysUtility.DeleteFolder(subDir);
+                        SysUtility.DeleteFolder(folderObj.Dir);
                     }
                 }
                 catch (Exception ex)
@@ -61,6 +59,18 @@ namespace VelaAgent.AutoRun
                     _logger.LogError(ex, "");
                 }
             }
+        }
+    }
+
+    class BackupFolder
+    {
+        public string Dir;
+        public DateTime Time;
+        public BackupFolder(string dir)
+        {
+            Dir = dir;
+            var folderName = Path.GetFileName(dir);
+            Time = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(folderName)).UtcDateTime;
         }
     }
 }
