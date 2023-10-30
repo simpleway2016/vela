@@ -827,6 +827,15 @@ namespace VelaWeb.Server.Controllers
         public async Task Restore(string guid, string backupFileName)
         {
             var project = _projectCenter.GetProject(guid);
+
+            await _db.InsertAsync(new Logs
+            {
+                UserId = this.UserId,
+                Operation = "从备份恢复",
+                Time = DateTime.UtcNow,
+                Detail = project.Name + "\r\n" + Path.GetFileName( backupFileName)
+            });
+
             await project.Restore(backupFileName);
         }
 
