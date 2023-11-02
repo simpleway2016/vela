@@ -109,7 +109,7 @@ namespace VelaAgent.Infrastructures
         }
 
        
-        public async Task RunImage(string imageName, string containerName, string programPath, bool hostNetwork, IEnumerable<string> portMaps, IEnumerable<string> folderMaps, string memoryLimit)
+        public async Task RunImage(string imageName, string containerName, string programPath, bool hostNetwork, IEnumerable<string> portMaps, IEnumerable<string> folderMaps, IEnumerable<string> envMaps, string memoryLimit)
         {
             StringBuilder cmdBuilder = new StringBuilder();
             cmdBuilder.Append($"docker run -d --name={containerName} -v \"{programPath}\":/vela/app --restart=unless-stopped");//on-failure:3
@@ -139,6 +139,17 @@ namespace VelaAgent.Infrastructures
                 }
             }
 
+            if (envMaps != null)
+            {
+                foreach (var v in envMaps)
+                {
+                    if (!string.IsNullOrWhiteSpace(v))
+                    {
+                        cmdBuilder.Append($" -e {v.Trim()}");
+                    }
+                }
+            }
+
             if (!string.IsNullOrWhiteSpace(memoryLimit))
             {
                 cmdBuilder.Append($" -m {memoryLimit}");
@@ -149,7 +160,7 @@ namespace VelaAgent.Infrastructures
             cmdBuilder.Clear();
         }
 
-        public async Task CreateImage(string imageName, string containerName, string programPath, bool hostNetwork, IEnumerable<string> portMaps, IEnumerable<string> folderMaps, string memoryLimit)
+        public async Task CreateImage(string imageName, string containerName, string programPath, bool hostNetwork, IEnumerable<string> portMaps, IEnumerable<string> folderMaps, IEnumerable<string> envMaps, string memoryLimit)
         {
             StringBuilder cmdBuilder = new StringBuilder();
             cmdBuilder.Append($"docker create --name={containerName} -v \"{programPath}\":/vela/app");
@@ -175,6 +186,17 @@ namespace VelaAgent.Infrastructures
                     if (!string.IsNullOrWhiteSpace(v))
                     {
                         cmdBuilder.Append($" -v {v.Trim()}");
+                    }
+                }
+            }
+
+            if (envMaps != null)
+            {
+                foreach (var v in envMaps)
+                {
+                    if (!string.IsNullOrWhiteSpace(v))
+                    {
+                        cmdBuilder.Append($" -e {v.Trim()}");
                     }
                 }
             }

@@ -16,7 +16,7 @@ namespace VelaAgent.Infrastructures
         Task<DockerContainer[]> GetContainers();
         Task<DockerContainerState[]> GetRunningContainerStates();
 
-        Task RunImage(string imageName, string containerName, string programPath,bool hostNetwork, IEnumerable<string> portMaps, IEnumerable<string> folderMaps, string memoryLimit);
+        Task RunImage(string imageName, string containerName, string programPath,bool hostNetwork, IEnumerable<string> portMaps, IEnumerable<string> folderMaps, IEnumerable<string> envMaps, string memoryLimit);
         Task StartContainer(string containerId);
         Task StopContainer(string containerId);
         Task RemoveImage(string imageName);
@@ -28,7 +28,7 @@ namespace VelaAgent.Infrastructures
         /// <returns></returns>
         Task PruneImages();
         Process StartContainerInProcess(string containerId);
-        Task CreateImage(string imageName, string containerName, string programPath, bool hostNetwork, IEnumerable<string> portMaps, IEnumerable<string> folderMaps, string memoryLimit);
+        Task CreateImage(string imageName, string containerName, string programPath, bool hostNetwork, IEnumerable<string> portMaps, IEnumerable<string> folderMaps, IEnumerable<string> envMaps, string memoryLimit);
     }
 
     public class ContainerStateProgress : IProgress<ContainerStatsResponse>

@@ -231,9 +231,15 @@ namespace VelaAgent.Infrastructures.ProjectRunners
                         {
                             folderMaps = Regex.Split(Project.DockerFolderMap, ",|，");
                         }
+
+                        string[] envMaps = null;
+                        if (!string.IsNullOrWhiteSpace(Project.DockerEnvMap))
+                        {
+                            envMaps = Regex.Split(Project.DockerEnvMap, ",|，");
+                        }
                         try
                         {
-                            await _dockerEngine.CreateImage(imageName, $"{Project.Name}_{Project.Guid}", publishPath, Project.IsHostNetwork, portMaps, folderMaps, Project.MemoryLimit);
+                            await _dockerEngine.CreateImage(imageName, $"{Project.Name}_{Project.Guid}", publishPath, Project.IsHostNetwork, portMaps, folderMaps, envMaps, Project.MemoryLimit);
                             allContainers = await _dockerEngine.GetContainers();
                             container = allContainers.FirstOrDefault(m => m.ImageName == imageName);
                             if (container == null)

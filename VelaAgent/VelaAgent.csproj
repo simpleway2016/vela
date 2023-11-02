@@ -7,7 +7,7 @@
 	  <ServerGarbageCollection>false</ServerGarbageCollection>
     <UserSecretsId>0d102c31-dff7-457b-9a64-3e1ff3afd75d</UserSecretsId>
 	  <NoWarn>$(NoWarn);NU1605</NoWarn>
-	  <Version>2.2.1</Version>
+	  <Version>2.2.2</Version>
   </PropertyGroup>
 
   <ItemGroup>

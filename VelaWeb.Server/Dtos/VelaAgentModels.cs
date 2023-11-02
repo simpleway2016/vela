@@ -538,6 +538,22 @@ namespace VelaAgent.DBModels.Dtos
                 }
             }
         }
+        string? _DockerEnvMap;
+        /// <summary>docker的环境变量设置</summary>
+        public virtual string? DockerEnvMap
+        {
+            get
+            {
+                return _DockerEnvMap;
+            }
+            set
+            {
+                if ((_DockerEnvMap != value))
+                {
+                    _DockerEnvMap = value;
+                }
+            }
+        }
     }
     public enum Project_RunTypeEnum:int
     {

@@ -1157,6 +1157,14 @@ const cmdInput = (e:Event)=>{
                                 </div>
 
                                 <div class="form-group" v-if="(editingModel.RunType&2)==2">
+                                    <label class="col-sm-3 control-label form-label">环境变量设置</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" class="form-control" v-model="editingModel.DockerEnvMap">
+                                        <span id="helpBlock" class="help-block">如 POSTGRES_PASSWORD=123456 ， POSTGRES_HOST_AUTH_METHOD=trust</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" v-if="(editingModel.RunType&2)==2">
                                     <label class="col-sm-3 control-label form-label">内存限制</label>
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" v-model="editingModel.MemoryLimit">
