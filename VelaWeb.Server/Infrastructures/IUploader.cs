@@ -36,8 +36,8 @@ namespace VelaWeb.Server.Infrastructures
             var client = _httpClientFactory.CreateClient("");
 
             var files = SysUtility.GetFolderFiles(sourceFolder, sourceFolder);
-            if (files.Length == 0)
-                throw new Exception("在编译输出目录没有找到任何文件");
+            //if (files.Length == 0)
+            //    throw new Exception("在编译输出目录没有找到任何文件");
 
             var fileInfos = files.Select(m => new UploadFileInfo()
             {
