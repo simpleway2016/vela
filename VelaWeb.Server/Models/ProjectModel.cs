@@ -129,7 +129,7 @@ namespace VelaWeb.Server.Models
             return outputDir;
         }
 
-        public async Task BuildAndPublish(RequestBuilding requestBuilding, int cols, int rows)
+        public async Task BuildAndPublish(RequestBuilding? requestBuilding, int cols, int rows)
         {
             var buildingManager = Global.ServiceProvider.GetRequiredService<BuildingManager>();
             var gitService = Global.ServiceProvider.GetRequiredService<IGitService>();
@@ -236,7 +236,7 @@ namespace VelaWeb.Server.Models
                     await projectBuildInfoOutput.OutputBuildInfoAsync(this, "编译命令执行完毕", false);
                 }
 
-                requestBuilding.Dispose();
+                requestBuilding?.Dispose();
 
                 var outputId = DateTime.Now.Ticks;
 

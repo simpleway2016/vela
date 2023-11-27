@@ -352,12 +352,12 @@ namespace VelaWeb.Server
                     }
                 }
 
-                foreach (var projectModel in projectModels)
-                {
-                    projectModel.Status = "申请暂停Git探测";
-                    projectModel.Error = null;
-                    await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "申请暂停Git探测", false);
-                }
+                //foreach (var projectModel in projectModels)
+                //{
+                //    projectModel.Status = "申请暂停Git探测";
+                //    projectModel.Error = null;
+                //    await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "申请暂停Git探测", false);
+                //}
 
                 //有新的提交
                 await gitWorker.Pause();
@@ -482,19 +482,25 @@ namespace VelaWeb.Server
                      });
                 }
 
-                foreach (var projectModel in projectModels)
+                for(int j = 0; j <  projectModels.Length; j ++)
                 {
+                    var projectModel = projectModels[j];
+                    //如果不是最后一个model，requestBuilding不用作为参数传下去，因为传下去会被dispose掉
+                    var buildingInfo = j == projectModels.Length - 1 ? requestBuilding : null;
+
+                    requestBuilding.ProjectName = projectModel.Name;
+
                     projectModel.Status = "成功完成拉取";
                     await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "成功完成拉取", false);
 
                     if (projectModel.PublishMode == 1 && isAuto)
                     {
-                        await projectModel.BuildAndPublish(requestBuilding, cols, rows);
+                        await projectModel.BuildAndPublish(buildingInfo, cols, rows);
                     }
                     else if (isAuto == false)
                     {
                         //这是手动启动
-                        await projectModel.BuildAndPublish(requestBuilding, cols, rows);
+                        await projectModel.BuildAndPublish(buildingInfo, cols, rows);
                     }
                     else
                     {

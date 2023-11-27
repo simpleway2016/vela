@@ -113,14 +113,18 @@ namespace VelaWeb.Server
     {
         private BuildingManager _buildingManager;
 
-        public string ProjectName { get; }
-        public string Comment { get; }
-
+        public string ProjectName { get; set; }
+        public string Comment { get; set; }
         public RequestBuilding(BuildingManager buildingManager, string projectName, string comment)
         {
             _buildingManager = buildingManager;
             ProjectName = projectName;
             Comment = comment;
+        }
+
+        public bool IsDisposed()
+        {
+            return _buildingManager == null;
         }
 
         public void Dispose()
