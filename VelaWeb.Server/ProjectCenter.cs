@@ -362,12 +362,12 @@ namespace VelaWeb.Server
                 //有新的提交
                 await gitWorker.Pause();
 
-                foreach (var projectModel in projectModels)
-                {
-                    projectModel.Status = "已暂停Git探测...";
-                    projectModel.Error = null;
-                    await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "已暂停Git探测", false);
-                }
+                //foreach (var projectModel in projectModels)
+                //{
+                //    projectModel.Status = "已暂停Git探测...";
+                //    projectModel.Error = null;
+                //    await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "已暂停Git探测", false);
+                //}
 
                 var outputId = DateTime.Now.Ticks;
 
