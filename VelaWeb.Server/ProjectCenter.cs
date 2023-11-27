@@ -292,19 +292,19 @@ namespace VelaWeb.Server
                 projectModels = projectModels.Where(m => m.Guid == runGuid).ToArray();
             }
 
-            foreach (var projectModel in projectModels)
-            {
-                projectModel.Status = "准备拉取...";
-                projectModel.Error = null;
-                if (changeFiles == null)
-                {
-                    await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "准备拉取", true);
-                }
-                else
-                {
-                    await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, $"发生变化的文件：{string.Join("\r\n", changeFiles)}", true);
-                }
-            }
+            //foreach (var projectModel in projectModels)
+            //{
+            //    projectModel.Status = "准备拉取...";
+            //    projectModel.Error = null;
+            //    if (changeFiles == null)
+            //    {
+            //        await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "准备拉取", true);
+            //    }
+            //    else
+            //    {
+            //        await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, $"发生变化的文件：{string.Join("\r\n", changeFiles)}", true);
+            //    }
+            //}
 
             bool needReclone = false;
 
@@ -431,6 +431,7 @@ namespace VelaWeb.Server
                             }
                         }
                     }
+
 
                     projectModels = findResult.ToArray();
                 }
