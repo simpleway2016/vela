@@ -292,19 +292,19 @@ namespace VelaWeb.Server
                 projectModels = projectModels.Where(m => m.Guid == runGuid).ToArray();
             }
 
-            //foreach (var projectModel in projectModels)
-            //{
-            //    projectModel.Status = "准备拉取...";
-            //    projectModel.Error = null;
-            //    if (changeFiles == null)
-            //    {
-            //        await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "准备拉取", true);
-            //    }
-            //    else
-            //    {
-            //        await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, $"发生变化的文件：{string.Join("\r\n", changeFiles)}", true);
-            //    }
-            //}
+            foreach (var projectModel in projectModels)
+            {
+                projectModel.Status = "";
+                projectModel.Error = null;
+                if (changeFiles == null)
+                {
+                    await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "准备拉取", true);
+                }
+                else
+                {
+                    await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, $"发生变化的文件：{string.Join("\r\n", changeFiles)}", true);
+                }
+            }
 
             bool needReclone = false;
 
@@ -391,6 +391,13 @@ namespace VelaWeb.Server
                         {
                             //计算哪些project发生了变化
                             var gitFullPath = Path.GetFullPath(gitFolder, AppDomain.CurrentDomain.BaseDirectory);
+                            if( string.IsNullOrWhiteSpace(project.ProgramPath) || project.ProgramPath == "." ||
+                                project.ProgramPath == "./" || project.ProgramPath == ".\\" || project.ProgramPath == "/" || project.ProgramPath == "\\")
+                            {
+                                project.ProgramPath = "";
+                                findResult.Add(project);
+                                continue;
+                            }
                             var programFullPath = Path.GetFullPath(Path.Combine(gitFolder, project.ProgramPath), AppDomain.CurrentDomain.BaseDirectory);
                             foreach (var changeFile in changeFiles)
                             {
