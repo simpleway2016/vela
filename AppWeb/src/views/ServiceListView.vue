@@ -1018,7 +1018,12 @@ const cmdInput = (e:Event)=>{
                                         <div class="radio radio-info radio-inline">
                                             <input type="radio" id="inlineRadio4" v-model="editingModel.PublishMode"
                                                 value="1" name="radioInline2">
-                                            <label for="inlineRadio4"> 分支提交自动触发 </label>
+                                            <label for="inlineRadio4"> 执行目录有提交自动触发 </label>
+                                        </div>
+                                        <div class="radio radio-info radio-inline">
+                                            <input type="radio" id="inlineRadio5" v-model="editingModel.PublishMode"
+                                                value="2" name="radioInline2">
+                                            <label for="inlineRadio5"> 任何提交自动触发 </label>
                                         </div>
                                     </div>
                                 </div>

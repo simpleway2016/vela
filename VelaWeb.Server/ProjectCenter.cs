@@ -162,7 +162,7 @@ namespace VelaWeb.Server
         /// <returns></returns>
         public bool NeedToWatchChanges(string gitHash)
         {
-            return _projectDict.Any(m => m.Value.PublishMode == 1 && m.Value.GetGitHash() == gitHash);
+            return _projectDict.Any(m => m.Value.PublishMode != 0 && m.Value.GetGitHash() == gitHash);
         }
 
         public ProjectModel? GetProjectByGitHash(string gitHash)
@@ -390,6 +390,7 @@ namespace VelaWeb.Server
                         foreach (var project in projectModels)
                         {
                             //计算哪些project发生了变化
+                           
                             var gitFullPath = Path.GetFullPath(gitFolder, AppDomain.CurrentDomain.BaseDirectory);
                             if( string.IsNullOrWhiteSpace(project.ProgramPath) || project.ProgramPath == "." ||
                                 project.ProgramPath == "./" || project.ProgramPath == ".\\" || project.ProgramPath == "/" || project.ProgramPath == "\\")
@@ -398,6 +399,13 @@ namespace VelaWeb.Server
                                 findResult.Add(project);
                                 continue;
                             }
+                            if (project.PublishMode == 2)
+                            {
+                                //任何变动都触发
+                                findResult.Add(project);
+                                continue;
+                            }
+
                             var programFullPath = Path.GetFullPath(Path.Combine(gitFolder, project.ProgramPath), AppDomain.CurrentDomain.BaseDirectory);
                             foreach (var changeFile in changeFiles)
                             {
@@ -501,7 +509,7 @@ namespace VelaWeb.Server
                     projectModel.Status = "成功完成拉取";
                     await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "成功完成拉取", false);
 
-                    if (projectModel.PublishMode == 1 && isAuto)
+                    if (projectModel.PublishMode != 0 && isAuto)
                     {
                         await projectModel.BuildAndPublish(buildingInfo, cols, rows);
                     }
