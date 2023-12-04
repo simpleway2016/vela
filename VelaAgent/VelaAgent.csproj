@@ -7,7 +7,7 @@
 	  <ServerGarbageCollection>false</ServerGarbageCollection>
     <UserSecretsId>0d102c31-dff7-457b-9a64-3e1ff3afd75d</UserSecretsId>
 	  <NoWarn>$(NoWarn);NU1605</NoWarn>
-	  <Version>2.2.2</Version>
+	  <Version>2.2.5</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-	  <PackageReference Include="JMS.FileUploader.AspNetCore" Version="1.0.2" />
+	  <PackageReference Include="JMS.FileUploader.AspNetCore" Version="2.1.3" />
     <PackageReference Include="Docker.DotNet" Version="3.125.15" />
     <PackageReference Include="JMS.Common" Version="3.3.3" />
     <PackageReference Include="System.Management" Version="7.0.2" />
