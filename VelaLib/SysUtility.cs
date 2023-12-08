@@ -363,6 +363,23 @@
 
             Directory.Delete(folderPath, false);
         }
+
+        /// <summary>
+        /// 删除子文件和文件夹
+        /// </summary>
+        /// <param name="folderPath"></param>
+        public static void DeleteSubFiles(string folderPath)
+        {
+            foreach (string file in Directory.GetFiles(folderPath))
+            {
+                DeleteFile(file);
+            }
+
+            foreach (string subfolder in Directory.GetDirectories(folderPath))
+            {
+                DeleteFolder(subfolder);
+            }
+        }
         public static string GetHashString(byte[] data)
         {
             using (SHA256 sha256 = SHA256.Create())

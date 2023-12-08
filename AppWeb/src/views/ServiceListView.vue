@@ -1092,7 +1092,7 @@ const cmdInput = (e:Event)=>{
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" v-model="editingModel.BuildPath">
                                         <span id="helpBlock"
-                                            class="help-block">这是<b>命令执行目录</b>的相对路径，此文件夹编译前会被清空，文件夹如果不存在会自动创建</span>
+                                            class="help-block">这是<b>命令执行目录</b>的相对路径，此文件夹编译前会被清空</span>
 
                                     </div>
                                 </div>

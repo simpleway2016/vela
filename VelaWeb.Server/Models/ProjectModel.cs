@@ -172,15 +172,15 @@ namespace VelaWeb.Server.Models
                         if (Directory.Exists(outputDir))
                         {
                             //先删除输出文件夹
-                            SysUtility.DeleteFolder(outputDir);
+                            SysUtility.DeleteSubFiles(outputDir);
                         }
                     }
                 }
 
-                if (Directory.Exists(outputDir) == false)
-                {
-                    Directory.CreateDirectory(outputDir);
-                }
+                //if (Directory.Exists(outputDir) == false)
+                //{
+                //    Directory.CreateDirectory(outputDir);
+                //}
 
                 var workdir = Path.GetFullPath(this.ProgramPath == "./" ? "" : this.ProgramPath, gitFolder);
                 if(Directory.Exists(workdir) == false)
