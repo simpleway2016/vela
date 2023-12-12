@@ -275,6 +275,62 @@ namespace VelaWeb.Server
 
         }
 
+        async ValueTask<ProjectModel[]> filterProjects(string gitFolder, ProjectModel[] projectModels , string[] changeFiles)
+        {
+            if (changeFiles == null)
+                return projectModels;
+
+            List<ProjectModel> findResult = new List<ProjectModel>();
+            if (changeFiles.Length == 1 && changeFiles[0] == "Git仓库重新克隆")
+            {
+                foreach (var projectModel in projectModels)
+                {
+                    projectModel.Status = "Git仓库已重新克隆";
+                    projectModel.Error = null;
+                    await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "Git仓库已重新克隆", false);
+                }
+
+                findResult.AddRange(projectModels);
+            }
+            else
+            {
+                foreach (var project in projectModels)
+                {
+                    //计算哪些project发生了变化
+
+                    var gitFullPath = Path.GetFullPath(gitFolder, AppDomain.CurrentDomain.BaseDirectory);
+                    if (string.IsNullOrWhiteSpace(project.ProgramPath) || project.ProgramPath == "." ||
+                        project.ProgramPath == "./" || project.ProgramPath == ".\\" || project.ProgramPath == "/" || project.ProgramPath == "\\")
+                    {
+                        project.ProgramPath = "";
+                        findResult.Add(project);
+                        continue;
+                    }
+                    if (project.PublishMode == 2)
+                    {
+                        //任何变动都触发
+                        findResult.Add(project);
+                        continue;
+                    }
+
+                    var programFullPath = Path.GetFullPath(Path.Combine(gitFolder, project.ProgramPath), AppDomain.CurrentDomain.BaseDirectory);
+                    foreach (var changeFile in changeFiles)
+                    {
+                        var changeFullPath = Path.GetFullPath(Path.Combine(gitFolder, changeFile), AppDomain.CurrentDomain.BaseDirectory);
+                        var relative = Path.GetRelativePath(programFullPath, changeFullPath);
+                        if (relative.StartsWith("..") == false)
+                        {
+                            //变化文件属于程序文件夹
+                            findResult.Add(project);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return findResult.ToArray();
+        }
+
         /// <summary>
         /// 拉取最新代码
         /// </summary>
@@ -285,7 +341,9 @@ namespace VelaWeb.Server
         {
             var gitFolder = $"./ProjectCodes/{gitHash}";
 
-            var projectModels = GetAllProjectsByGitHash(gitHash);
+            var allProjectModels = GetAllProjectsByGitHash(gitHash);
+            var projectModels = await filterProjects(gitFolder, allProjectModels, changeFiles);
+
             if (runGuid != null)
             {
                 //锁定指定的projectModel
@@ -373,56 +431,7 @@ namespace VelaWeb.Server
 
                 if (changeFiles != null)
                 {
-                    List<ProjectModel> findResult = new List<ProjectModel>();
-                    if (changeFiles.Length == 1 && changeFiles[0] == "Git仓库重新克隆")
-                    {
-                        foreach (var projectModel in projectModels)
-                        {
-                            projectModel.Status = "Git仓库已重新克隆";
-                            projectModel.Error = null;
-                            await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "Git仓库已重新克隆", false);
-                        }
-
-                        findResult.AddRange(projectModels);
-                    }
-                    else
-                    {
-                        foreach (var project in projectModels)
-                        {
-                            //计算哪些project发生了变化
-                           
-                            var gitFullPath = Path.GetFullPath(gitFolder, AppDomain.CurrentDomain.BaseDirectory);
-                            if( string.IsNullOrWhiteSpace(project.ProgramPath) || project.ProgramPath == "." ||
-                                project.ProgramPath == "./" || project.ProgramPath == ".\\" || project.ProgramPath == "/" || project.ProgramPath == "\\")
-                            {
-                                project.ProgramPath = "";
-                                findResult.Add(project);
-                                continue;
-                            }
-                            if (project.PublishMode == 2)
-                            {
-                                //任何变动都触发
-                                findResult.Add(project);
-                                continue;
-                            }
-
-                            var programFullPath = Path.GetFullPath(Path.Combine(gitFolder, project.ProgramPath), AppDomain.CurrentDomain.BaseDirectory);
-                            foreach (var changeFile in changeFiles)
-                            {
-                                var changeFullPath = Path.GetFullPath(Path.Combine(gitFolder, changeFile), AppDomain.CurrentDomain.BaseDirectory);
-                                var relative = Path.GetRelativePath(programFullPath, changeFullPath);
-                                if (relative.StartsWith("..") == false)
-                                {
-                                    //变化文件属于程序文件夹
-                                    findResult.Add(project);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-
-                    if (findResult.Count == 0 && projectModels.Length > 0)
+                    if (projectModels.Length == 0 && allProjectModels.Length > 0)
                     {
                         if (!string.IsNullOrWhiteSpace(projectModels[0].GitUrl))
                         {
@@ -446,9 +455,6 @@ namespace VelaWeb.Server
                             }
                         }
                     }
-
-
-                    projectModels = findResult.ToArray();
                 }
                 else
                 {
