@@ -142,6 +142,7 @@ namespace VelaService
             if (_process.WaitForExit(10000))
             {
                 Console.WriteLine($"进程{_process.Id}短时间内结束，不再自动重启");
+                System.Diagnostics.Process.GetCurrentProcess().Kill();
                 return;
             }
             _process.EnableRaisingEvents = true;

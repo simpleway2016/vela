@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
+using System.Runtime.InteropServices;
 using System.Text;
 using VelaLib;
 using Way.Lib;
@@ -30,6 +31,14 @@ namespace VelaWeb.Server.Infrastructures
 
         public bool CheckPackage(string filepath)
         {
+            if(OperatingSystem.IsWindows() == false)
+            {
+                if (filepath.Contains(".win."))
+                {
+                    return false;
+                }
+            }
+
             using (ZipArchive archive = ZipFile.OpenRead(filepath))
             {
                 // 遍历 ZIP 文件的每个条目
