@@ -4,7 +4,7 @@ import { GlobalInfo } from "@/GlobalInfo";
 import Loading from "@/components/Loading.vue";
 import JmsUploader from "jms-uploader"
 import AgentUserList from "./AgentUserList.vue";
-import { ref, shallowRef, onMounted } from "vue"
+import { ref, shallowRef, onMounted, onUnmounted } from "vue"
 import { useToast } from "vue-toastification";
 import { onBeforeRouteLeave } from "vue-router";
 const isBusy = ref(false);
@@ -17,8 +17,13 @@ const userInfo = GlobalInfo.UserInfo;
 const currentAgentId = ref(0);
 const childView = shallowRef(<any>null);
 
+var unmounted = false;
 onMounted(() => {
     init();
+});
+
+onUnmounted(() => {
+    unmounted = true;
 });
 
 const init = async () => {
@@ -85,10 +90,12 @@ const refreshDatas = async () => {
         });
 
         datas.value.splice(0, datas.value.length, ...ret);
-        getVersion();
+
 
         upgradeVersion.value = await GlobalInfo.get("/Upgrade/GetUpgradeVersion", null);
         console.log("是否有更新：", upgradeVersion.value);
+
+        await getVersion();
     } catch (error) {
         GlobalInfo.showError(error);
     }
@@ -98,8 +105,8 @@ const refreshDatas = async () => {
 }
 
 const getVersion = async () => {
-    for (var i = 0; i < datas.value.length; i++) {
-        checkAgentVersion(datas.value[i], 10);
+    for (var i = 0; unmounted == false && i < datas.value.length; i++) {
+        await checkAgentVersionNoRetry(datas.value[i]);
     }
 }
 
@@ -199,6 +206,21 @@ const onSelectedFile = async () => {
     }
     finally {
         isUploading.value = false;
+    }
+}
+
+const checkAgentVersionNoRetry = async (agent: any) => {
+    try {
+
+        var currentVersion = await GlobalInfo.get("/AgentService/GetAgentVersion", { id: agent.id });
+        console.log(agent.Desc + "版本:" + currentVersion);
+        if (currentVersion == agent.Version) {
+            throw "retry";
+        }
+        else {
+            agent.Version = currentVersion;
+        }
+    } catch (error) {
     }
 }
 
@@ -303,10 +325,10 @@ const menuClick = (e: Event) => {
 const restart = async () => {
     if (window.confirm("确定重启web服务器吗？")) {
         try {
-            await GlobalInfo.get("/AgentService/Restart",null);
-            
+            await GlobalInfo.get("/AgentService/Restart", null);
+
         } catch (error) {
-           GlobalInfo.showError(error);
+            GlobalInfo.showError(error);
         }
     }
 }
