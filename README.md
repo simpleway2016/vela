@@ -1,2 +1,1 @@
-# Vela
-轻量级CICD工具，自动部署到docker运行，实时浏览程序资源占用
+项目代码已转移到：https://gitcode.com/simpleman2000/VelaAgent.git
