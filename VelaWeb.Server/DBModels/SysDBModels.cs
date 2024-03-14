@@ -775,6 +775,262 @@ namespace VelaWeb.Server.DBModels
             base.SetValue<UserAgentPower>(exp);
         }
     }
+    /// <summary>代码转换任务</summary>
+    [TableConfig]
+    [Table("codemission")]
+    [Way.EntityDB.DataItemJsonConverter]
+    public class CodeMission :Way.EntityDB.DataItem
+    {
+        System.Nullable<Int64> _id;
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [DisallowNull]
+        [Column("id")]
+        public virtual System.Nullable<Int64> id
+        {
+            get
+            {
+                return _id;
+            }
+            set
+            {
+                if ((_id != value))
+                {
+                    SendPropertyChanging("id",_id,value);
+                    _id = value;
+                    SendPropertyChanged("id");
+                }
+            }
+        }
+        string _Name;
+        [MaxLength(50)]
+        [DisallowNull]
+        [Column("name")]
+        public virtual string Name
+        {
+            get
+            {
+                return _Name;
+            }
+            set
+            {
+                if ((_Name != value))
+                {
+                    SendPropertyChanging("Name",_Name,value);
+                    _Name = value;
+                    SendPropertyChanged("Name");
+                }
+            }
+        }
+        CodeMission_TypeEnum _Type=(CodeMission_TypeEnum)(1);
+        [DisallowNull]
+        [Column("type")]
+        public virtual CodeMission_TypeEnum Type
+        {
+            get
+            {
+                return _Type;
+            }
+            set
+            {
+                if ((_Type != value))
+                {
+                    SendPropertyChanging("Type",_Type,value);
+                    _Type = value;
+                    SendPropertyChanged("Type");
+                }
+            }
+        }
+        Byte[]? _Code;
+        /// <summary>代码</summary>
+        [Display(Name = "代码")]
+        [Column("code")]
+        public virtual Byte[]? Code
+        {
+            get
+            {
+                return _Code;
+            }
+            set
+            {
+                if ((_Code != value))
+                {
+                    SendPropertyChanging("Code",_Code,value);
+                    _Code = value;
+                    SendPropertyChanged("Code");
+                }
+            }
+        }
+        Byte[]? _Script;
+        /// <summary>转换脚本</summary>
+        [Display(Name = "转换脚本")]
+        [Column("script")]
+        public virtual Byte[]? Script
+        {
+            get
+            {
+                return _Script;
+            }
+            set
+            {
+                if ((_Script != value))
+                {
+                    SendPropertyChanging("Script",_Script,value);
+                    _Script = value;
+                    SendPropertyChanged("Script");
+                }
+            }
+        }
+        System.Nullable<Int64> _ParentId;
+        /// <summary>上级id</summary>
+        [Display(Name = "上级id")]
+        [Column("parentid")]
+        public virtual System.Nullable<Int64> ParentId
+        {
+            get
+            {
+                return _ParentId;
+            }
+            set
+            {
+                if ((_ParentId != value))
+                {
+                    SendPropertyChanging("ParentId",_ParentId,value);
+                    _ParentId = value;
+                    SendPropertyChanged("ParentId");
+                }
+            }
+        }
+        string _Language="CSharp";
+        /// <summary>语言</summary>
+        [MaxLength(50)]
+        [DisallowNull]
+        [Display(Name = "语言")]
+        [Column("language")]
+        public virtual string Language
+        {
+            get
+            {
+                return _Language;
+            }
+            set
+            {
+                if ((_Language != value))
+                {
+                    SendPropertyChanging("Language",_Language,value);
+                    _Language = value;
+                    SendPropertyChanged("Language");
+                }
+            }
+        }
+        Int64 _UserId;
+        /// <summary>拥有者id</summary>
+        [DisallowNull]
+        [Display(Name = "拥有者id")]
+        [Column("userid")]
+        public virtual Int64 UserId
+        {
+            get
+            {
+                return _UserId;
+            }
+            set
+            {
+                if ((_UserId != value))
+                {
+                    SendPropertyChanging("UserId",_UserId,value);
+                    _UserId = value;
+                    SendPropertyChanged("UserId");
+                }
+            }
+        }
+        string? _Path;
+        /// <summary>
+        /// 路径描述
+        /// /上级id/
+        /// </summary>
+        [MaxLength(1024)]
+        [Display(Name = "路径描述 /上级id/")]
+        [Column("path")]
+        public virtual string? Path
+        {
+            get
+            {
+                return _Path;
+            }
+            set
+            {
+                if ((_Path != value))
+                {
+                    SendPropertyChanging("Path",_Path,value);
+                    _Path = value;
+                    SendPropertyChanged("Path");
+                }
+            }
+        }
+        /// <summary>把字段的更新，设置为一个指定的表达式值</summary>
+        /// <param name="exp">指定的更新表达式，如 m=&gt;m.age == m.age + 1 &amp;&amp; name == name + "aa"，相当于sql语句的 age=age+1,name=name + 'aa'</param>
+         public virtual void SetValue(System.Linq.Expressions.Expression<Func<CodeMission, bool>> exp)
+        {
+            base.SetValue<CodeMission>(exp);
+        }
+    }
+    public enum CodeMission_TypeEnum:int
+    {
+        Folder = 1,
+        Mission = 2
+    }
+    [TableConfig]
+    [Table("vuemethod")]
+    [Way.EntityDB.DataItemJsonConverter]
+    public class VueMethod :Way.EntityDB.DataItem
+    {
+        Int64 _UserId;
+        [Key]
+        [DisallowNull]
+        [Column("userid")]
+        public virtual Int64 UserId
+        {
+            get
+            {
+                return _UserId;
+            }
+            set
+            {
+                if ((_UserId != value))
+                {
+                    SendPropertyChanging("UserId",_UserId,value);
+                    _UserId = value;
+                    SendPropertyChanged("UserId");
+                }
+            }
+        }
+        string _Code;
+        [DisallowNull]
+        [Column("code")]
+        public virtual string Code
+        {
+            get
+            {
+                return _Code;
+            }
+            set
+            {
+                if ((_Code != value))
+                {
+                    SendPropertyChanging("Code",_Code,value);
+                    _Code = value;
+                    SendPropertyChanged("Code");
+                }
+            }
+        }
+        /// <summary>把字段的更新，设置为一个指定的表达式值</summary>
+        /// <param name="exp">指定的更新表达式，如 m=&gt;m.age == m.age + 1 &amp;&amp; name == name + "aa"，相当于sql语句的 age=age+1,name=name + 'aa'</param>
+         public virtual void SetValue(System.Linq.Expressions.Expression<Func<VueMethod, bool>> exp)
+        {
+            base.SetValue<VueMethod>(exp);
+        }
+    }
 }
 
 namespace VelaWeb.Server.DBModels.DB
@@ -811,6 +1067,8 @@ namespace VelaWeb.Server.DBModels.DB
             modelBuilder.Entity<FileDeleteSetting>().HasKey(m => m.id);
             modelBuilder.Entity<ProjectAlarmSetting>().HasKey(m => m.id);
             modelBuilder.Entity<UserAgentPower>().HasKey(m => m.id);
+            modelBuilder.Entity<CodeMission>().HasKey(m => m.id);
+            modelBuilder.Entity<VueMethod>().HasKey(m => m.UserId);
         }
         System.Linq.IQueryable<UserInfo> _UserInfo;
         public virtual System.Linq.IQueryable<UserInfo> UserInfo
@@ -901,40 +1159,71 @@ namespace VelaWeb.Server.DBModels.DB
                 return _UserAgentPower;
             }
         }
+        System.Linq.IQueryable<CodeMission> _CodeMission;
+        /// <summary>代码转换任务</summary>
+        public virtual System.Linq.IQueryable<CodeMission> CodeMission
+        {
+            get
+            {
+                if (_CodeMission == null)
+                {
+                    _CodeMission = this.Set<CodeMission>();
+                }
+                return _CodeMission;
+            }
+        }
+        System.Linq.IQueryable<VueMethod> _VueMethod;
+        public virtual System.Linq.IQueryable<VueMethod> VueMethod
+        {
+            get
+            {
+                if (_VueMethod == null)
+                {
+                    _VueMethod = this.Set<VueMethod>();
+                }
+                return _VueMethod;
+            }
+        }
         protected override string GetDesignString()
         {
             var result = new StringBuilder();
             result.Append("\r\n");
-            result.Append("H4sIAAAAAAAACuVca2/TVhj+K5WlfaMoviR2EPvQJWWKxqCiME0ifHDi0+Dh2MGXdV1XadoGLZcKNsa6sqJRqYOCRgbTBqVd1z8TJ+mn/YWdYzuJ7aTO1Y4Nn+pz9TnPec/zXvymi9h5NicABTtxcdF8PMMWAXYCm70q8CrAjmHnpHmzNaOCovlkdeE52PwJK2iwgC8d");
-            result.Append("a9arCyXQasFSMmBVYMw9lVd5ScRsffOSqAJRtXVfzJrryGIn4CPPwb8EGT+WxfJsCY2GZVETBFiBpoClLHZBAXJGnJOyGKxNsyqbYxWQScM2Coc1/GkpfwUWYkuwkJIErSgqsHixMT2eTDCe86NesJxRpjRVyoh5GRThmmGTKmsAzcmKZ+AQWDHHCgqq4XLnIQjG4Bxf");
-            result.Append("4FFnWGvVWdNPi1oxDeZ40VYnALGgXm6VOTDHaoJqYNOqNfAx9mcik1FmPjKK1nokmQOysbWY0ZrmlbzMF3mRVSXZtsqUwCqKtUtraqPqFHy2VcPjaiGV9ETKfOiIVfOlTbCs1dqw+pyV85dZuV+wslg8ZozpE67Gklp44aPGi4554jUDR8/D10cZM2LkmOEOzLJY/ckP");
-            result.Append("9Rt/GqttIndOQhQxMGo9XEn4MkkussLE+xNwQVlxioO7gwWr9qsJ/ORJAh2vE9bRgEqOBNRLaJb0pylJnOMLBueZNRYzGLxpYL5k52TOYlA7v1M4nAzpglkVkrnBpV00AuGvRki4ZKT2S7n6aLm6sarf3NTXt53CMlUwJGNA7UATkdUOiWC1A016IjXFcTJQlJ6vbQe8");
-            result.Append("/Ge7RNAagvLWEJKsDgPYANLVM4clglAM4+Qw0oPDLrNioS8OOytwTQO73Ww9A+Y9WkUwb6MmBEDeeD/X2ZwdoZE2ljsYhJUGqz9g81e0knmS3IwslYCs8gCBuWiHAJ2djHiaFRprRlS6tOSnoRdG3Ikw4j5yY3EwEh2htZjFcPNtAZuL3U7GtcwOx2Pqtt7OEJEYBwSg");
-            result.Append("OkhsnGxPRZPtw8w8RDweIeppLryD1JosGkq5jfsqty3fqU1oW01OibXJpttNq965Uz944WTnNFDy4wiA9C6ciaCc9fZ7Hj5xS/jr2NOebHZaQtsd1JGnI+vI0wE78t4B8YZ8Da5RBoOrZ8+UDtqJT7p57t5qZX/DyXNnobJhzR5hdgLogMO9jLf9kgYqywvh1g90EPrB");
-            result.Append("DhnuCdl5fjgHH+oJoDbmGMP1pHwKHEEAM8oFkb9qrKsxX0ZJCZqiAhlw9rcYCgTNZwxtcR6a1n0sg89qHpV7zuCUOe2vMmfcUfoft6srr/U/3tS2b+m7d2oPvqs+/PZw/a6TKNGOoW3+GcirM9I8kAdW+Ew8sgqfCVbhMwlvJ9I8jQ+1IyELifJiAlb8DB1tQ4kZTwh/");
-            result.Append("KM50CONo6fgokg+OkBlfnfmm+9Tmyzdbegk+9eqURkbhDjenzbAfn+AkwxoFImIxpxrOYvrK9drLPafST8F9FiR5IdSpMImgDNcoBILwmK/Go2HjOXzqn5Yre6/08oPqxq/6yqPD9a16+d/aftkpR6d4AaQNnGaBqvJiYUDrEYptZMNFxgYDsx4hUkzHo6reeKq/vK/f");
-            result.Append("Xf3vn9v6428mjn/Jl5yHNf3FUMkNvl94J5C+25MQSXcgqXLwsHZ/XV9+pG89dYXN2YWhUml8NCu7wRb9zBDc34RninA7zoa/XH/+uHrzt9ruQSfis8ziKYGVi8NSHx6LLPURwVIfjr8VjrMTtgCIDndLeL6k1V9dqx8s19b/hfZh5c0tSHqW4iBj8KG+uV3b2jX7kLH3");
-            result.Append("XNZjSRvCcOQkzbiAPrEhEWhEHWJLuu3t69f05z+3w+vE8GNQDLn93Q1JcuRIUm7D5saT+uZt/fv9yt6WSwKLIU+x6AYeFX2lTPjqAx+lYNs84qM69pPXM75bPF4yJEOS6GPHpGOv5oUNZU4QTkbpKtiE3vuLDZTbc9pQ389z/Ii8ng5Zmt1kO/5uhYeoiIqgO2etsnOz");
-            result.Append("svN19fdN0/2qrr06XPsLpvhaPtnyM/31y8r+Afy2iazUg/XKzjP9+Vq1/Le+sV29/6K6WtZ37+lPbtX2Vio7u7Wnu07CPs0q5uL6+mzfgbd9/mrfTboT75Z0x8OZLWyTY+/w5bQsS3JK0ixXfNxBpCxm+gB95ARTI7f2vbPeMooZNwmF8ukbrXdM+fibpUqRHRNb6uWD");
-            result.Append("w7Uyiz6IeaS2GB/MhklsgZKajGx8jgw2Pmf85sbjJ6noLMKcoeHEK4DAHIFHOqOlG15vwacHOpp2NeGdYpZRpkWTZqPp3NFvlX6FRetNGBLDVspLQxiR1kIwo38VtABTZIrHM6KaoIw3OXpbEtref1aVoci0D2iJae9jHJs6cmmX0LZQKxRXayCdY+IUnktO5hJEfpJi");
-            result.Append("8swkQyTxSQrQJEXTHMnE5rCl/wHEf/EVJkkAAA==");
+            result.Append("H4sIAAAAAAAACu1c23LTRhh+FUYzvSNgybKkMPQiTaDjKachwHQGc6FYm6AiS0GHBkozQ1sgJzLQUkpDw5S0gQQGAnRaSJOGvIxlm6u+Qlcr2ZZkRz7pmPTK3tVqtfvtv99/2F+6hp1hRwSgYIfOXzP/nmALADuEDV8WeBVg+7HT0oR5NauCgvnPasJz8PI5VtBgAZ/c");
+            result.Append("X6tXr46D+hVsUAasClDfA3mVl0TM1jYviSoQVVvzazlzHDnsEPzLc/CXSGf257A8O27cDcuiJgiwwugClnLYWQXIWXFUymGwdohV2RFWAdkheI3EYQ1/TMpfgoXUJCwMSoJWEBVYPF/tHu+nGM/+jVawnFUGNFXKinkZFOCY4SVV1oDRJyuegLfAilFWUIwabuQMBAHd");
+            result.Append("PMKP8UZjWGvVWd0fEbXCEBjlRVudAMQx9WK9zIFRVhNUhE29FuGD5mcik1VOfYaK1ngkmQMymloKXR3ilbzMF3iRVSXZNspBgVUUa5ZW16jqKPxvq4bLVUeq3xMp809TrGoPrYFljdaG1ZesnL/Iyp2ClcMyKXRPh3BVh1THC/cbLzrlidcpePcEfHySMSN8xwx3YJbD");
+            result.Append("Kis/VGb+QKOtIXdaMiiia9Ta2JLwYZJcYIV9H++DA8qJAxycHSxYtV/vww8fJozldcLqD6hpX0C9YPQy9PmgJI7yY4jzzBqLGRBvIswn7ZzMWQxq53cSh50ZumBYhWSOuLSFRiCC1QiUS0bKv6yVHk+VFuf12SV9YdUpLANjSDK61A40kVjtQIWrHei0J1IDHCcDRWl7");
+            result.Append("2zbBK3i2o8LWEKS3hpBktRfAupCutjmMCkMxRMlhaQ8Ou8iKYx1x2EmBqxnYjWbrCTDhcVUEEzZqMgDIo+dzzc1ZH420SPZgGFYarP6EzV/Sxs2V5E7J0jiQVR4YYF6zQ2CsnWzwNCtUx2xQ6eRkkIZeHHEn4oi778ZidyTqo7WYw3DzaSGbi61WxjXMJstj6rb21tAg");
+            result.Append("MQ4IQHWQWJRsTyaT7ePMPEQmkyDqqQ28idSaLBpLuc0EKrd136lBaOuXnBJrk023m1a6c6ey/drJzkNAyUcRAGlfOKmwnPXGfR4/caOCdexpTzY7JhnT7daRpxPryNMhO/LeAfGqfHWvUbqDq23PlA7bie9389y9+eLWopPnTkJlw5ot4uwE0CGHexlv+2UIqCwvxFs/");
+            result.Append("0GHoBztkuCdkZ/jeHHyoJ4Ba7SOC7UkGFDiCAGaVsyJ/GY2r2l9WGRQ0RQUy4OxPQQrE6A/dWuc8o1v3snTfq7lU7j7DU+Z0sMqccUfpf1wtTb/TX/1dXp3TN+6UH94oPfruw8JdJ1EaM4a2+Rcgr56SJoDctcJnMolV+Ey4Cp+hvJ1IczU+1XaELCbKiwlZ8TN0sg0l");
+            result.Append("JpoQfk+c6RBGf+l4J5IPj5CZQJ35mvvU4MvXrrQTfGrXKU2Mwu2tT5thH53g9Mc1CkSkUk41nMP06VvlN5tOpT8I5zkmyVdjnQpDhWW4JiEQhKcCNR6RjefwqX+aKm6+1dcelhZ/1acff1hYrqy9L2+tOeXoKC+AIYTTMFBVXhzr0nqEYpvYcBGaYGjWI0SKabpUpZln");
+            result.Append("+pv7+t35f/+5rT/9dt+Br/hx52IdudJTckPgG94JZOD2JETSHUgqbj8q31/Qpx7ry89cYXP2ak+pNAGala1gS35mCB5swjNJuB1n5C9XXj4tzT4pb2w3Iz7LLB4QWLnQK/XhqcRSHxEu9eH4rnCcnbCFQHS4W8Lz41rl7c3K9lR54T20D4t/z0HSsxRHOgX/VJZWy8sb");
+            result.Append("Zpt06iOX9Tiu9WA4cpKGNmBAbEiEGlGH2Kbd9vatm/rLnxvhdWJ4HBRibn+3QjLtO5Kk27CZWaks3da/3ypuLrsksBDzFItW4JHJV8pEoD7wTgq2wSPeqWEneT3R7eJoyTAdk0QfOyZNW9U2bCxzgvB0kraCTei9T2yg3J7Wejo/H+F98nqaZGm2ku3M3goPkQkVQXfO");
+            result.Append("WnF9trh+vfRiyXS/Sg/efnjwJ0zxtXyyqef6uzfFrW14tmlYqdsLxfXn+ssHpbW/9MXV0v3Xpfk1feOevjJX3pwurm+Un204CfsYq5iD6+jYvglvB3xq30q6qb0l3Zl4Zgvb5Ng7fHlEliV5UNIsVzzqIFIOM32ADnKCSd+tfe+st6xixk1ioXw6RmuPKZ9gs1TJdNPE");
+            result.Append("lsra9ocHa6xxIOaR2oIOzHpJbIGS2p/Y+Fw63PgceufG45VUYy3inKHhxCuEwByBJzqjpRVeu+DogU6mXU14p5hllSOiSbPJdO7ovaVfmUD1K9Xgg23+Xn78TWXrRWn+t+Lmpj675Iq+Shw4zitKNbu+C6WKZ8ikKlUEV3hKFc94R2nMP/E9RnDCFbxOxTPe1GdOMuDX");
+            result.Append("k49KApxf9fVka6/AIoFu7ZwPW4Ho96kWnqGbckIjD/QEZQFa70HZJq0g8/v4Cs+483JMAq3cgClUL5zADcNnjqu9fFEpSuR2wdlVsPmbbv3YYM25G3R0VuWrQogi/SEUjeDHly/iZwkSqTgLrk1EGzLr1mfLGyuWVVf3ali5s4hAIxMG6+C2EtW9Fecj8ETTpu8mTcz0");
+            result.Append("cjpy3kTPiidxEskT3e5e/LGEss23aWrGQp2Ko3urhkgnQ7tRKbel/+plZfW6+6RZHNOqbBAPUww+bRh2Z74W0AGxxOGwefcIOZkQIW94I2juSWlxpnL9ptuKi/spRSvxjkMwefeIdybYWLV3nsU5DRwH6kWJ6zouTSX2+8MImhDj0pT394djzwrhfrYI4uV94tFrMFUF");
+            result.Append("VyLDKvnnvAQVqFZ28lKDTnZe7sytbUFYUW3DOLFWK5/Wato089wYxWRT8DqNG/7PnMlhg2CzPnZTtMC2FBEanUxCfCr3tzkq717p729Y32nNiQerYfKD7ji5wanhn/HjKYL0x8didp+PFQ/JT+BJZvzWq7cvEpm7MzgZgEULJyQF9edXZcHwc419DcvDV+F4CweyokqR");
+            result.Append("6EmO1paANLYfVmWYUdh4Q11K2r/HMakdh3bBmJZxFWYzWjfSI0yGxEf6+0YoIt9HMnmmjyH68T4S0GmSprk0kxrFJv8DyspSAUVvAAA=");
             return result.ToString();
         }
     }
 }
 
 /*<design>
-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
+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
 <design>*/
 

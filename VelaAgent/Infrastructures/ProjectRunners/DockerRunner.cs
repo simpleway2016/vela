@@ -74,9 +74,12 @@ namespace VelaAgent.Infrastructures.ProjectRunners
                 if (Project.RunType == Project_RunTypeEnum.Docker)
                 {
                     var dockerfilepath = Path.Combine("./Dockerfiles", Project.Guid);
+                    string dockerfilecontent = File.ReadAllText(dockerfilepath, System.Text.Encoding.UTF8).Replace("%uid%", Program.ProcessUserId.ToString());
+                    
                     var targetfilepath = Path.Combine(publishPath, "Dockerfile");
                     //拷贝docker文件
-                    File.Copy(dockerfilepath, targetfilepath, true);
+                    //File.Copy(dockerfilepath, targetfilepath, true);
+                    File.WriteAllText(targetfilepath, dockerfilecontent, System.Text.Encoding.UTF8);
 
                     var imageName = $"{Project.Guid}:latest";
                     bool tobuild = false;
@@ -115,7 +118,7 @@ namespace VelaAgent.Infrastructures.ProjectRunners
                         if (images.Contains(imageName))
                         {
                             await _dockerEngine.RemoveImage(imageName);
-                            await _dockerEngine.PruneImages();
+                            //await _dockerEngine.PruneImages();
                         }
 
                         var worker = Global.ServiceProvider.GetRequiredService<TtyWorker>();

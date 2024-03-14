@@ -16,7 +16,7 @@ namespace VelaWeb.Server.Infrastructures
         /// <returns></returns>
         bool CheckPackage(string filepath);
         string GetVersion(bool readCache = true);
-        bool IsWebServerPackage(string filepath);
+        bool IsWebServerPackage(string filepath,string filename);
         void UpgradeWebServer(string filepath);
     }
 
@@ -71,8 +71,13 @@ namespace VelaWeb.Server.Infrastructures
             });
         }
 
-        public bool IsWebServerPackage(string filepath)
+        public bool IsWebServerPackage(string filepath,string filename)
         {
+            if (OperatingSystem.IsWindows() == false && filename.Contains(".win." , StringComparison.OrdinalIgnoreCase))
+                return false;
+            else if (OperatingSystem.IsWindows() && filename.Contains(".linux." , StringComparison.OrdinalIgnoreCase))
+                return false;
+
             using (ZipArchive archive = ZipFile.OpenRead(filepath))
             {
                 // 遍历 ZIP 文件的每个条目

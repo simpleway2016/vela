@@ -15,6 +15,8 @@ import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import { POSITION, useToast } from "vue-toastification";
 
 const defaultDockerfileContent = `FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+RUN useradd -u %uid% -m job || true                   #%uid%会被自动替换为运行vela-agent的用户id
+USER %uid%
 WORKDIR /vela/app
 ENTRYPOINT ["dotnet", "yourApplication.dll"]`;
 
@@ -113,6 +115,10 @@ onUnmounted(() => {
 });
 
 onBeforeRouteUpdate((to, from) => {
+    console.log(to);
+    if(to.name != "serviceList")
+        return;
+
     ProjectListProperties.searchKey = <string>to.params.search;
     console.log("路由变更，search:", ProjectListProperties.searchKey);
     refreshDatas();

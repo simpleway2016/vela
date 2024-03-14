@@ -9,7 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VelaLib", "VelaLib\VelaLib.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VelaWeb.Server", "VelaWeb.Server\VelaWeb.Server.csproj", "{DD548481-62D5-4FB4-B83E-4B2837D35D5E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VelaService", "VelaService\VelaService.csproj", "{A82E202E-8D72-42DB-AF08-B3F4F0E39E34}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VelaService", "VelaService\VelaService.csproj", "{A82E202E-8D72-42DB-AF08-B3F4F0E39E34}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vela.CodeParser.CSharp", "Vela.CodeParser.CSharp\Vela.CodeParser.CSharp.csproj", "{11B1E9E8-7219-458E-AE3C-C88959EDD35C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vela.CodeParser", "Vela.CodeParser\Vela.CodeParser.csproj", "{61C20665-326A-4565-B6F1-11413364E566}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vela.UnitTest", "Vela.UnitTest\Vela.UnitTest.csproj", "{EE2E0971-CFC2-4DD0-895A-01120199513C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +39,18 @@ Global
 		{A82E202E-8D72-42DB-AF08-B3F4F0E39E34}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A82E202E-8D72-42DB-AF08-B3F4F0E39E34}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A82E202E-8D72-42DB-AF08-B3F4F0E39E34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11B1E9E8-7219-458E-AE3C-C88959EDD35C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11B1E9E8-7219-458E-AE3C-C88959EDD35C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11B1E9E8-7219-458E-AE3C-C88959EDD35C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11B1E9E8-7219-458E-AE3C-C88959EDD35C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61C20665-326A-4565-B6F1-11413364E566}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61C20665-326A-4565-B6F1-11413364E566}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61C20665-326A-4565-B6F1-11413364E566}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61C20665-326A-4565-B6F1-11413364E566}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE2E0971-CFC2-4DD0-895A-01120199513C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE2E0971-CFC2-4DD0-895A-01120199513C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE2E0971-CFC2-4DD0-895A-01120199513C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE2E0971-CFC2-4DD0-895A-01120199513C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

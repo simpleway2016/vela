@@ -98,6 +98,33 @@ namespace VelaService
                 Directory.CreateDirectory(workFolder);
             }
 
+            if (username != "root")
+            {
+                //创建用户
+                try
+                {
+                    cmd.RunForResult(null, "useradd -m " + username);
+                }
+                catch (Exception)
+                {
+                    try
+                    {
+                        //创建家目录
+                        if(Directory.Exists($"/home/{username}") == false)
+                        {
+                            cmd.RunForResult(null, $"mkdir /home/{username}");
+                            cmd.RunForResult(null, $"chown -R {username} /home/{username}");
+                            cmd.RunForResult(null, $"chmod -R 700 /home/{username}");
+                        }
+                       
+                    }
+                    catch (Exception)
+                    {
+                         
+                    }
+                }
+            }
+
             new LinuxSystemService().Register(username, _config.ServiceName, _config.Description, serviceFolder, Path.Combine(serviceFolder, "VelaService") + " -exec");
 
             IOUtility.CopyFolder(AppDomain.CurrentDomain.BaseDirectory, serviceFolder);
@@ -109,6 +136,12 @@ namespace VelaService
             cmds.AppendLine($"chmod -R 700 \"{serviceFolder}\"");
             cmds.AppendLine($"chown -R {username} \"{workFolder}\"");
             cmds.AppendLine($"chmod -R 700 \"{workFolder}\"");
+
+            if(username != "root" && _config.ServiceName == "vela-agent")
+            {
+                cmds.AppendLine($"groupadd -f docker");
+                cmds.AppendLine($"usermod -aG docker {username}");
+            }
 
             var p = cmd.RunInBash(null, cmds.ToString());
             p.WaitForExit();

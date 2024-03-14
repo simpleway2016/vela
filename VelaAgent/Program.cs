@@ -21,6 +21,8 @@ using VelaLib.Windows;
 using VelaLib.Linux;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using VelaAgent.KeepAlive;
+using System.Text.RegularExpressions;
+using System;
 
 namespace VelaAgent
 {
@@ -30,8 +32,29 @@ namespace VelaAgent
     }
     public class Program
     {
+        public static int ProcessUserId;
         public static void Main(string[] args)
         {
+            if (!OperatingSystem.IsWindows())
+            {
+
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = "id",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+
+                var process = System.Diagnostics.Process.Start(startInfo);
+                process.WaitForExit();
+                var t1 = process.StandardOutput.ReadToEnd();
+                var m = Regex.Match(t1, "uid=(?<n>[0-9]+)");
+                ProcessUserId = int.Parse(m.Groups["n"].Value);
+                Console.WriteLine($"Running userid:{ProcessUserId}");
+            }
             Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
             ThreadPool.SetMinThreads(300, 300);
 
@@ -132,8 +155,8 @@ namespace VelaAgent
             var app = builder.Build();
             Global.ServiceProvider = app.Services;
 
-
             var logger = app.Services.GetService<ILogger<Program>>();
+
             app.Services.GetRequiredService<KeepProcessAliveFactory>().Init();
             app.Services.GetRequiredService<DeleteBackups>().Run();
 

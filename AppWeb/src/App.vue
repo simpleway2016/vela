@@ -4,6 +4,7 @@ import { GlobalInfo } from './GlobalInfo';
 import LoginView from './views/LoginView.vue';
 import { useRouter } from 'vue-router';
 const userInfo = GlobalInfo.UserInfo;
+const routeInfo = GlobalInfo.routeInfo;
 const ProjectListProperties = GlobalInfo.ProjectListProperties;
 const router = useRouter();
 
@@ -12,12 +13,16 @@ const showHideLeftMenu = () => {
     (<any>window).$(leftMenuEle.value).toggle(100);
 }
 
-const searchKeyUp = (e:KeyboardEvent)=>{
-    if(e.key == "Enter"){
-        router.push({ name: 'serviceList', params: { search: ProjectListProperties.searchKey }});
+const searchKeyUp = (e: KeyboardEvent) => {
+    if (e.key == "Enter") {
+        router.push({ name: 'serviceList', params: { search: ProjectListProperties.searchKey } });
     }
 }
-
+const searchKeyUp_codeMission = (e: KeyboardEvent) => {
+    if (e.key == "Enter") {
+        router.push({ name: 'codeMission', params: { search: ProjectListProperties.codeMissionSearchKey } });
+    }
+}
 const logout = () => {
     userInfo.Token = <any>null;
     localStorage.removeItem("Token");
@@ -43,12 +48,15 @@ const logout = () => {
 
             <!-- Start Searchbox -->
             <div class="searchform">
-                <input type="text" class="searchbox" @keyup="searchKeyUp" v-model="ProjectListProperties.searchKey" placeholder="Search">
+                <input type="text" class="searchbox" @keyup="searchKeyUp" v-model="ProjectListProperties.searchKey"
+                    placeholder="Search" v-if="routeInfo.currentPath!='codeMission'">
+                    <input type="text" class="searchbox" @keyup="searchKeyUp_codeMission" v-model="ProjectListProperties.codeMissionSearchKey"
+                    placeholder="搜索模型" v-if="routeInfo.currentPath=='codeMission'">
                 <span class="searchbutton"><i class="fa fa-search"></i></span>
             </div>
             <!-- End Searchbox -->
 
-           
+
 
             <!-- Start Top Right -->
             <ul class="top-right">
@@ -59,7 +67,9 @@ const logout = () => {
                             alt="img"><b>{{ userInfo.Name }}</b><span class="caret"></span></div>
                     <ul class="dropdown-menu dropdown-menu-list dropdown-menu-right">
                         <li role="presentation" class="dropdown-header">用户中心</li>
-                        <li><RouterLink to="/changePassword"><i class="fa falist fa-wrench"></i>修改密码</RouterLink></li>
+                        <li>
+                            <RouterLink to="/changePassword"><i class="fa falist fa-wrench"></i>修改密码</RouterLink>
+                        </li>
                         <li><a @click="logout"><i class="fa falist fa-power-off"></i> 退出登录</a></li>
                     </ul>
                 </li>
@@ -78,28 +88,34 @@ const logout = () => {
             <div ref="leftMenuEle" id="leftMenu" class="sidebar">
 
                 <ul class="sidebar-panel nav">
-                    <li class="sidetitle">MAIN</li>
+                    <li class="sidetitle">{{ routeInfo.isBusy ? "正在加载..." : "MAIN" }}</li>
 
-                    <li v-if="userInfo.Role == 1048577">
-                        <RouterLink to="/agentList">
-                            <span class="icon color8"><i class="fa fa-th"></i></span>服务器列表
-                        </RouterLink>
-                    </li>
-                    <li>
-                        <RouterLink to="/serviceList">
-                            <span class="icon color8"><i class="fa fa-diamond"></i></span>程序部署列表
-                        </RouterLink>
-                    </li>
-                    <!-- <li>
-                        <RouterLink to="/openSources">
-                            <span class="icon color8"><i class="fa fa-star-o"></i></span>开源程序
-                        </RouterLink>
-                    </li> -->
+                    <template v-if="!routeInfo.isBusy">
+                        <li v-if="userInfo.Role == 1048577">
+                            <RouterLink to="/agentList">
+                                <span class="icon color8"><i class="fa fa-th"></i></span>服务器列表
+                            </RouterLink>
+                        </li>
+                        <li>
+                            <RouterLink to="/serviceList">
+                                <span class="icon color8"><i class="fa fa-diamond"></i></span>程序部署列表
+                            </RouterLink>
+                        </li>
+                    </template>
                 </ul>
 
-                <ul class="sidebar-panel nav">
+                <ul class="sidebar-panel nav" v-if="!routeInfo.isBusy">
+                    <li class="sidetitle">TOOLS</li>
+                    <li>
+                        <RouterLink to="/codeMission">
+                            <span class="icon color8"><i class="fa fa-fire"></i></span>代码转换
+                        </RouterLink>
+                    </li>
+                </ul>
+
+                <ul class="sidebar-panel nav" v-if="!routeInfo.isBusy">
                     <li class="sidetitle">SYSTEM</li>
-                    <li v-if="userInfo.Role==1048577">
+                    <li v-if="userInfo.Role == 1048577">
                         <RouterLink to="/userManagement">
                             <span class="icon color8"><i class="fa fa-cubes"></i></span>系统用户
                         </RouterLink>
@@ -178,7 +194,7 @@ const logout = () => {
     background-color: #F5F5F5;
 }
 
-.version{
+.version {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -188,5 +204,10 @@ const logout = () => {
     text-align: center;
     pointer-events: none;
     opacity: 0.8;
+}
+
+.sidebar-panel li a[aria-current='page'] {
+  color: #f2f2f2 !important;
+  background: rgba(0, 0, 0, 0.2) !important;
 }
 </style>

@@ -38,7 +38,8 @@ namespace VelaWeb.Server.Controllers
         public async Task<string> UploadAgent([FromBody] object state)
         {
             string filepath = this.Request.Headers["FilePath"].ToString();
-            if (System.IO.Path.GetExtension(this.Request.Headers["Name"].ToString()) != ".zip")
+            var filename = this.Request.Headers["Name"].ToString();
+            if (System.IO.Path.GetExtension(filename) != ".zip")
             {
                 SysUtility.DeleteFile(filepath);
                 throw new ServiceException("只能上传.zip文件");
@@ -52,7 +53,7 @@ namespace VelaWeb.Server.Controllers
             }
             else
             {
-                if (_upgradePackageService.IsWebServerPackage(filepath))
+                if (_upgradePackageService.IsWebServerPackage(filepath, filename))
                 {
                     _upgradePackageService.UpgradeWebServer(filepath);
                     return "upgradeWebServer";

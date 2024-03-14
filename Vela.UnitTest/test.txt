@@ -1,0 +1,138 @@
+﻿namespace MyNamespace{
+
+     /// <summary>订单状态枚举</summary>
+    public enum Order_StatusEnum:int
+    {
+        /// <summary>支付超时</summary>
+        PayTimeout = 20,
+        /// <summary>已取消</summary>
+        Cancel = 30,
+        /// <summary>未支付</summary>
+        Wait = 100,
+        /// <summary>已支付</summary>
+        Pay = 200
+    }
+
+        /// <summary>
+    /// 代码解析接口
+    /// </summary>
+    public interface ICodeParser
+    {
+        /// <summary>
+        /// 语言
+        /// </summary>
+        string Language { get; }
+        /// <summary>
+        /// 解析代码
+        /// </summary>
+        /// <param name="code">代码</param>
+        /// <returns>解析结果</returns>
+        BaseCodeNodeInfo Parser(string code);
+    }
+
+ [Category("abc" , Age=1)]
+    public class SKUDto
+    {
+         /// <summary>销售单价</summary>
+          [Category("abc" , Age=1)]
+         private int _Price1,_Price2;
+
+        public virtual System.Nullable<Int64> id
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        /// 商品id
+        /// </summary>
+        public virtual Int64 ProductId
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        /// 名称
+        /// 格式
+        /// { zhCN : "名称" }
+        /// </summary>
+        /// <param name="syntaxNode"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        public virtual Dawn.Dtos.LangObject Name
+        {
+            get;
+            set;
+        }
+        /// <summary>销售单价</summary>
+        public virtual double Price
+        {
+            get;
+            set;
+        }
+        /// <summary>库存</summary>
+        public virtual Decimal Quantity
+        {
+            get;
+            set;
+        }
+        /// <summary>销量</summary>
+        public virtual Decimal SalesVolume
+        {
+            get;
+            set;
+        }
+        public virtual DateTime CreateTime
+        {
+            get;
+            set;
+        }
+        /// <summary>图片地址列表</summary>
+        public virtual string[] Pics
+        {
+            get;
+            set;
+        }
+        /// <summary>成本价</summary>
+        public virtual System.Nullable<double> Cost
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        /// 属性列表
+        /// 格式：
+        /// {
+        /// zhCN: {
+        /// "颜色" : "蓝色",
+        /// "内存" : "512G"
+        /// },
+        /// enUS: {
+        /// "Color" : "Blue",
+        /// "Memory" : ""512G"
+        /// }
+        /// }
+        /// </summary>
+        public virtual Dictionary<string,  Dictionary<string,string>> Properties
+        {
+            get;
+            set;
+        }
+        /// <summary>系统id</summary>
+        public virtual Int64 SystemId
+        {
+            get;
+            set;
+        }
+
+                /// <summary>
+        /// 获取备注信息对象
+        /// 1=abc 2=内容
+        /// </summary>
+        /// <param name="syntaxNode">第一节点</param>
+        /// <param name="flag">浮动率</param>
+        /// <exception cref="NotImplementedException"></exception>
+        /// <returns>备注信息对象</returns>
+        static CaptionInfo GetDocumentationComment(SyntaxNode syntaxNode , int flag)
+        {
+        }
+    }
+}

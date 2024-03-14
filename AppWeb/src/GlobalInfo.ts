@@ -9,6 +9,10 @@ export class GlobalInfo {
         Version: "",
         Role: 0,//admin:1048577
     });
+    static routeInfo = reactive({
+        isBusy:false,
+        currentPath:""
+    });
     static ProgramCategories = <any[]>[];
     static ServerUrl: string = <any>process.env.ServerUrl;
     static RefreshTokenInterval = 600000;
@@ -22,6 +26,7 @@ export class GlobalInfo {
         selectedAgentCategory : "",
         selectedProjectCategory : "",
         searchKey : "",
+        codeMissionSearchKey:""
     });
 
     static showError = (err: any) => {
@@ -49,6 +54,23 @@ export class GlobalInfo {
             });
         }
     }
+
+    static toast = (msg:string,timeout=true)=>{
+        if(timeout){
+            toast(msg,{
+                position: POSITION.BOTTOM_CENTER,
+            });
+        }
+        else{
+            toast(msg, {
+                position: POSITION.BOTTOM_CENTER,
+                closeOnClick: true,
+                timeout: false
+            });
+        }
+    }
+
+
 
     static init = () => {
         if (GlobalInfo.ServerUrl == "..") {

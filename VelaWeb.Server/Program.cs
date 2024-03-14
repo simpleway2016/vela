@@ -28,6 +28,10 @@ using VelaLib.Dtos;
 using VelaLib.Windows;
 using VelaLib.Linux;
 using VelaWeb.Server.Git;
+using Vela.CodeParser.CSharp;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using VelaWeb.Server.CodeParsers;
 
 namespace VelaWeb
 {
@@ -46,17 +50,29 @@ namespace VelaWeb
 
             if (!string.IsNullOrWhiteSpace(builder.Configuration["Https:Cert"]))
             {
-                var uri = new Uri(builder.Configuration["Urls"].Replace("*","a.com"));
+                var uri = new Uri(builder.Configuration["Urls"].Replace("*", "a.com"));
                 builder.WebHost.ConfigureKestrel(options =>
                 {
+                    // 禁用 HTTP/2.0 ，用2.0浏览器在重用连接时，竟然用 CONNECT 方法来连接websocket，连接websocket会提示405错误，无法连接
+                    options.ConfigureEndpointDefaults(endpointOptions =>
+                    {
+                        endpointOptions.Protocols = HttpProtocols.Http1;
+                    });
+
                     options.Listen(IPAddress.Any, uri.Port, listenOptions =>
                     {
                         var serverCertificate = new X509Certificate2(builder.Configuration["Https:Cert"], builder.Configuration["Https:Password"]);
                         var httpsConnectionAdapterOptions = new HttpsConnectionAdapterOptions()
                         {
-                            ServerCertificate = serverCertificate
+                            ServerCertificate = serverCertificate,
 
                         };
+
+                        var sslProtocols = builder.Configuration.GetSection("Https:SslProtocols").Get<SslProtocols?>();
+                        if(sslProtocols != null)
+                        {
+                            httpsConnectionAdapterOptions.SslProtocols = sslProtocols.Value;
+                        }
                         listenOptions.UseHttps(httpsConnectionAdapterOptions);
                     });
                 });
@@ -66,7 +82,7 @@ namespace VelaWeb
             services.AddSingleton<IGitService, DefaultGitService>();
             if (OperatingSystem.IsWindows())
             {
-                services.AddSingleton<ICmdRunner, WindowsCmdRunner>();              
+                services.AddSingleton<ICmdRunner, WindowsCmdRunner>();
                 services.AddSingleton<IFileService, WindowsFileService>();
                 services.AddTransient<ITerminal, WindowsTerminal>();
             }
@@ -84,23 +100,30 @@ namespace VelaWeb
                     services.AddTransient<ITerminal, LinuxTerminal>();
                 }
             }
+
+            //注册代码解析器
+            services.RegisterCodeParser<CSharpCodeParser>();
+            services.RegisterCodeParser<JsonCodeParser>();
+
             services.AddTransient<TtyWorker>();
             services.AddSingleton<GitManager>();
             services.AddSingleton<AlarmManager>();
             services.AddSingleton<AgentsManager>();
             services.AddSingleton<IUploader, HttpPostUploader>();
             services.AddSingleton<WebSocketConnectionCenter>();
-            services.AddSingleton<IProjectBuildInfoOutput,WebSocketAndLoggingProjectStateOutput>();
+            services.AddSingleton<IProjectBuildInfoOutput, WebSocketAndLoggingProjectStateOutput>();
             services.AddSingleton<ProjectCenter>();
-            services.AddSingleton<IUpgradePackageService,DefaultUpgradePackageService>();
+            services.AddSingleton<IUpgradePackageService, DefaultUpgradePackageService>();
             services.AddSingleton<DeleteLogs>();
             services.AddSingleton<BuildingManager>();
             services.AddTransient<JMS.JmsUploadClient>();
 
-            services.AddMvc(option => {
+            services.AddMvc(option =>
+            {
                 option.Filters.Add<OutputResultFilter>();
             });
-            services.AddControllers().AddJsonOptions(c => {
+            services.AddControllers().AddJsonOptions(c =>
+            {
                 c.JsonSerializerOptions.PropertyNamingPolicy = new NormalPolicy();
             });
             //关闭参数自动校验
@@ -151,10 +174,10 @@ namespace VelaWeb
 
             var app = builder.Build();
             app.UseCors("abc");
-          
+
             Global.Init(app.Services);
 
-          
+
             app.Services.GetRequiredService<DeleteLogs>().Start();
             app.Services.GetRequiredService<AgentsManager>().Init();
             app.Services.GetRequiredService<ProjectCenter>().Init();
@@ -173,7 +196,7 @@ namespace VelaWeb
             app.UseAuthorization();
 
             app.MapControllers();
-           
+
 
             using (var db = new SysDBContext())
             {

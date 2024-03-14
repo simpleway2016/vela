@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	  <NoWarn>$(NoWarn);NU1605</NoWarn>
 	  <ServerGarbageCollection>false</ServerGarbageCollection>
-	  <Version>2.5.2</Version>
+	  <Version>2.5.11</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +22,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\Vela.CodeParser.CSharp\Vela.CodeParser.CSharp.csproj" />
 	  <ProjectReference Include="..\VelaLib\VelaLib.csproj" />
 	  <ProjectReference Include="..\VelaService\VelaService.csproj" />
 	</ItemGroup>

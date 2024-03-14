@@ -30,9 +30,18 @@ namespace VelaLib
                 HashAlgorithmName.SHA256,
                 RSASignaturePadding.Pkcs1);
 
+            //添加san扩展=》域名绑定
+            //var sanBuilder = new SubjectAlternativeNameBuilder();
+            //sanBuilder.AddDnsName("localhost");
+            //sanBuilder.AddIpAddress(IPAddress.Parse("127.0.0.1"));
+            //var sanExtension = sanBuilder.Build();
+            //request.CertificateExtensions.Add(sanExtension);
+
             // 添加有效期限
             request.CertificateExtensions.Add(
                 new X509BasicConstraintsExtension(true, false, 0, true));
+
+           
 
             // 创建自签名证书
             DateTimeOffset now = DateTimeOffset.UtcNow;

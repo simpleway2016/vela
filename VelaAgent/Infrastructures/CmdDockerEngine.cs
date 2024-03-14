@@ -134,7 +134,14 @@ namespace VelaAgent.Infrastructures
                 {
                     if (!string.IsNullOrWhiteSpace(v))
                     {
-                        cmdBuilder.Append($" -v {v.Trim()}");
+                      if (v.Trim().StartsWith("\"") == false)
+                        {
+                            cmdBuilder.Append($" -v \"{v.Trim()}\"");
+                        }
+                        else
+                        {
+                            cmdBuilder.Append($" -v {v.Trim()}");
+                        }
                     }
                 }
             }
@@ -145,7 +152,14 @@ namespace VelaAgent.Infrastructures
                 {
                     if (!string.IsNullOrWhiteSpace(v))
                     {
-                        cmdBuilder.Append($" -e {v.Trim()}");
+                        if (v.Trim().StartsWith("\"") == false)
+                        {
+                            cmdBuilder.Append($" -e \"{v.Trim()}\"");
+                        }
+                        else
+                        {
+                            cmdBuilder.Append($" -e {v.Trim()}");
+                        }
                     }
                 }
             }
@@ -185,7 +199,14 @@ namespace VelaAgent.Infrastructures
                 {
                     if (!string.IsNullOrWhiteSpace(v))
                     {
-                        cmdBuilder.Append($" -v {v.Trim()}");
+                        if (v.Trim().StartsWith("\"") == false)
+                        {
+                            cmdBuilder.Append($" -v \"{v.Trim()}\"");
+                        }
+                        else
+                        {
+                            cmdBuilder.Append($" -v {v.Trim()}");
+                        }
                     }
                 }
             }
@@ -196,7 +217,14 @@ namespace VelaAgent.Infrastructures
                 {
                     if (!string.IsNullOrWhiteSpace(v))
                     {
-                        cmdBuilder.Append($" -e {v.Trim()}");
+                        if (v.Trim().StartsWith("\"") == false)
+                        {
+                            cmdBuilder.Append($" -e \"{v.Trim()}\"");
+                        }
+                        else
+                        {
+                            cmdBuilder.Append($" -e {v.Trim()}");
+                        }
                     }
                 }
             }
@@ -231,7 +259,10 @@ namespace VelaAgent.Infrastructures
             await _cmdRunner.RunForResult(null, $"docker rmi {imageName}");
         }
 
-        
+        /// <summary>
+        /// 用于清理不再被使用的镜像
+        /// </summary>
+        /// <returns></returns>
         public async Task PruneImages()
         {
             await _cmdRunner.RunForResult(null, "docker image prune -f");

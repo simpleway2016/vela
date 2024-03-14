@@ -2,6 +2,9 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import AgentListView from "../views/AgentListView.vue"
 import ServiceListView from '@/views/ServiceListView.vue'
 import OpenSourcesView from '@/views/OpenSourcesView.vue'
+import { GlobalInfo } from '@/GlobalInfo';
+
+var timer = 0;
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -63,11 +66,30 @@ const router = createRouter({
       component:() => import('@/views/AlarmSettingView.vue')
     },
     {
+      path:"/codeMission/:search?",
+      name:"codeMission",
+      component:() => import('@/views/CodeMissionList.vue')
+    },
+    {
       path:"/openSources",
       name:"openSources",
       component:OpenSourcesView
     }
   ]
-})
+});
+
+router.beforeEach((to, from, next) => {
+  GlobalInfo.routeInfo.currentPath = <any>to.name;
+  timer = window.setTimeout(()=>{
+    GlobalInfo.routeInfo.isBusy = true;
+  } , 200);
+  next()
+});
+
+router.afterEach(()=>{
+  window.clearTimeout(timer);
+  timer = 0;
+  GlobalInfo.routeInfo.isBusy = false;
+});
 
 export default router
