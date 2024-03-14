@@ -7,3 +7,7 @@ Vela是一套快速部署程序的工具（俗称CI/CD），只需要提供一�
 - 部署程序和编译服务器一对一绑定，他人无法访问部署接口；
 
 - Docker容器以普通用户运行，免除root权限带来的危险；
+
+## 使用文档
+
+[http://jms.jacktan.cn/#/doc/42/0](http://jms.jacktan.cn/#/doc/42/0)
