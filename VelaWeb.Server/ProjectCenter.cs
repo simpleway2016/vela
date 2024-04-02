@@ -162,7 +162,7 @@ namespace VelaWeb.Server
         /// <returns></returns>
         public bool NeedToWatchChanges(string gitHash)
         {
-            return _projectDict.Any(m => m.Value.PublishMode != 0 && m.Value.GetGitHash() == gitHash);
+            return _projectDict.Any(m => m.Value.PublishMode != 0 && m.Value.GetGitHash() == gitHash && m.Value.IsStopped == false);
         }
 
         public ProjectModel? GetProjectByGitHash(string gitHash)
