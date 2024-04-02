@@ -162,7 +162,7 @@ namespace VelaWeb.Server
         /// <returns></returns>
         public bool NeedToWatchChanges(string gitHash)
         {
-            return _projectDict.Any(m => m.Value.PublishMode != 0 && m.Value.GetGitHash() == gitHash && m.Value.IsStopped == false);
+            return _projectDict.Any(m => m.Value.PublishMode != 0 && m.Value.GetGitHash() == gitHash);
         }
 
         public ProjectModel? GetProjectByGitHash(string gitHash)
@@ -343,6 +343,11 @@ namespace VelaWeb.Server
 
             var allProjectModels = GetAllProjectsByGitHash(gitHash);
             var projectModels = await filterProjects(gitFolder, allProjectModels, changeFiles);
+            if(changeFiles != null && runGuid == null)
+            {
+                //需要去掉已经手动停止的项目
+                projectModels = projectModels.Where(m => m.IsStopped == false).ToArray();
+            }
 
             if (runGuid != null)
             {
