@@ -307,10 +307,6 @@ namespace VelaAgent.Infrastructures.ProjectRunners
          
             using var db = new SysDBContext();
             Project.ProcessId = null;
-            if(_process != null && _process.ExitCode == 0)
-            {
-                Project.IsStopped = true;
-            }
             db.Update(Project);
 
         
