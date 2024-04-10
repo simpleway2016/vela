@@ -32,6 +32,9 @@ const datas = ref(<any[]>[]);
 const isLoadingBranches = ref(false);
 const branches = ref(<any[]><any>null);
 const toast = useToast();
+const exporting = ref(false);
+const importing = ref(<any>null);
+const importingServerId = ref(0);
 
 let childView = shallowRef(<any>null);
 const publishingInfo = ref("");
@@ -74,7 +77,7 @@ const refreshPublishing = async () => {
 
     }
     finally {
-        window.setTimeout(()=>{ refreshPublishing(); } , 2000);
+        window.setTimeout(() => { refreshPublishing(); }, 2000);
     }
 }
 
@@ -116,7 +119,7 @@ onUnmounted(() => {
 
 onBeforeRouteUpdate((to, from) => {
     console.log(to);
-    if(to.name != "serviceList")
+    if (to.name != "serviceList")
         return;
 
     ProjectListProperties.searchKey = <string>to.params.search;
@@ -196,6 +199,21 @@ const onWebSocketMessage = async (data: any) => {
     }
 }
 
+const initData = (m: any) => {
+    if (!m.Status)
+        m.Status = "";
+
+    if (!m.Error)
+        m.Error = "";
+
+    m.MemoryPercent = 0;
+    m.CpuPercent = 0;
+    m.OwnerServer.Offline = false;
+    m.isLoadingInfo = true;
+    m.isSelected = false;
+    return m;
+}
+
 const refreshDatas = async () => {
     if (isBusy.value)
         return;
@@ -208,17 +226,8 @@ const refreshDatas = async () => {
         ret = JSON.parse(ret);
 
         ret.forEach((m: any) => {
-            if (!m.Status)
-                m.Status = "";
 
-            if (!m.Error)
-                m.Error = "";
-
-            m.MemoryPercent = 0;
-            m.CpuPercent = 0;
-            m.OwnerServer.Offline = false;
-            m.isLoadingInfo = true;
-
+            initData(m);
         });
         datas.value.splice(0, datas.value.length, ...ret);
 
@@ -290,15 +299,15 @@ const refreshAllCategories = () => {
 
 
 const addClick = () => {
-    editingModel.value = {
+    editingModel.value = initData({
         "OwnerServer": { "id": 0, "Address": "", "Port": 0, Offline: false },
         PublishPathMode: 0,
         "User": null, "id": null, "Name": "", "ExcludeFiles": "", "RunCmd": null, "PublishPath": null,
         "ConfigFiles": "", "GitUrl": "", "BranchName": "", "PublishMode": 0, "IsNeedBuild": false, "ProgramPath": "", "BuildCmd": "",
         "Status": 0, "CpuRate": null, "MemoryRate": null, "GitUserName": "", "GitPwd": "", "BuildPath": "", "Guid": "", "ProcessId": null,
         "GitRemote": "origin", "IsHostNetwork": false, MemoryLimit: "", DeleteNoUseFiles: true,
-        "CodePath": "", "Desc": null, "UserId": null, RunType:1,
-    };
+        "CodePath": "", "Desc": null, "UserId": null, RunType: 1
+    });
 
     dockerfileContent.value = defaultDockerfileContent;
 
@@ -339,7 +348,7 @@ const copyNew = async (item: any) => {
         newItem.PublishPathMode = 0;
     }
 
-    editingModel.value = newItem;
+    editingModel.value = initData(newItem);
 
 
 
@@ -347,7 +356,7 @@ const copyNew = async (item: any) => {
 }
 
 const publish = async (item: any) => {
-    if(isBusy.value){
+    if (isBusy.value) {
         GlobalInfo.showError("正在加载数据，请稍后再试...");
         return;
     }
@@ -358,7 +367,7 @@ const publish = async (item: any) => {
     } catch (error) {
         GlobalInfo.showError(error);
     }
-    finally{
+    finally {
         isBusy.value = false;
     }
 }
@@ -380,11 +389,11 @@ const editConfigFile = async (item: any) => {
     currentGuid.value = item.Guid;
 }
 
-const getRunTypeStr = (item:any)=>{
-    if(item.RunType == (1<<5 | 1<<1)){
+const getRunTypeStr = (item: any) => {
+    if (item.RunType == (1 << 5 | 1 << 1)) {
         return "Docker";
     }
-    else{
+    else {
         return "Prog";
     }
 }
@@ -432,9 +441,9 @@ const editClick = async (item: any) => {
         editingModel.value.PublishPathMode = 0;
     }
 
-    window.setTimeout(()=>{
-        cmdInput(<any>{ target : txtCmd.value });
-    } , 1000);
+    window.setTimeout(() => {
+        cmdInput(<any>{ target: txtCmd.value });
+    }, 1000);
 }
 
 const restore = async (item: any) => {
@@ -633,6 +642,7 @@ const okClick = async () => {
 }
 
 const cancelClick = () => {
+    importing.value = null;
     editingModel.value = null;
     branches.value = <any>null;
     publishPath.value = "";
@@ -659,11 +669,144 @@ const menuClick = (e: Event) => {
     });
 }
 
-const cmdInput = (e:Event)=>{
+const cmdInput = (e: Event) => {
     var ele = <HTMLTextAreaElement>e.target;
-    if(ele.scrollHeight > 80){
+    if (ele.scrollHeight > 80) {
         ele.style.height = `${ele.scrollHeight}px`;
     }
+}
+
+const selectAllExport = () => {
+    datas.value.forEach(m => m.isSelected = true);
+}
+
+const fileEle = ref(<HTMLInputElement><any>null);
+const onSelectedFile = async () => {
+    if (fileEle.value.files?.length) {
+        const reader = new FileReader();
+
+        reader.onload = (e: any) => {
+            fileEle.value.value = "";
+            try {
+                const obj = JSON.parse(e.target.result);
+
+                if (!obj.Items.length) {
+                    GlobalInfo.showError("文件里没有任何部署程序");
+                    return;
+                }
+
+                obj.Items.forEach((item: any) => {
+                    item.isSelected = false;
+                });
+                importing.value = obj;
+            } catch (error) {
+                GlobalInfo.showError(error);
+            }
+        };
+
+        reader.onerror = () => {
+            fileEle.value.value = "";
+            GlobalInfo.showError("读取文件错误");
+        };
+
+        reader.readAsText(fileEle.value.files[0]);
+    }
+}
+
+const exportClick = async () => {
+    if (exporting.value == false) {
+        exporting.value = true;
+    }
+    else {
+        try {
+            var selectedItems = datas.value.filter(m => m.isSelected).map(m => m.Guid);
+            if (selectedItems.length > 0) {
+                var content = await GlobalInfo.postJson("/AgentService/ExportProjects", selectedItems);
+
+                const blob = new Blob([content], { type: 'text/plain' });
+
+                // 创建一个链接元素用于下载
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = URL.createObjectURL(blob);
+                a.download = "部署.json";
+
+                // 将链接元素添加到文档中，并触发点击事件
+                document.body.appendChild(a);
+                a.click();
+
+                // 移除链接元素，释放URL对象
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+            }
+            datas.value.forEach(m => m.isSelected = false);
+        } catch (err) {
+            GlobalInfo.showError(err);
+        }
+        exporting.value = false;
+    }
+}
+const selectAllImport = ()=>{
+    importing.value.Items.forEach((item:any)=>{
+        item.isSelected = true;
+    });
+}
+const okImportClick = async () => {
+    if (isBusy.value)
+        return;
+
+    var items = (<any[]>importing.value.Items).filter(m => m.isSelected);
+    if (items.length == 0) {
+        toast.error("没有选择任何程序", {
+            position: POSITION.BOTTOM_CENTER,
+        });
+        return;
+    }
+
+    var server = agents.value.find(m => m.id == importingServerId.value);
+    if (!server) {
+        toast.error("请选择所属服务器", {
+            position: POSITION.BOTTOM_CENTER,
+        });
+        return;
+    }
+
+
+
+    isBusy.value = true;
+    try {
+        for (var i = 0; i < items.length; i++) {
+            var item = JSON.parse(JSON.stringify(items[i]));
+            item.OwnerServer = server;
+            var oldguid = item.Guid;
+            var guid = await GlobalInfo.postJson("/AgentService/ImportProject", item);
+            item.Guid = guid;
+            item.GitPwd = "";
+            item.User = GlobalInfo.UserInfo.Name;
+            datas.value.splice(0, 0, item);
+
+
+            var dockerfileContent = importing.value.DockerFiles[oldguid];
+
+
+            //保存dockerfile
+            if (dockerfileContent) {
+                await GlobalInfo.post("/AgentService/SaveDockerfile", { guid: item.Guid, content: dockerfileContent });
+            }
+        }
+
+        //刷新程序分类列表
+        refreshAllCategories();
+
+        importing.value = null;
+    } catch (error) {
+        GlobalInfo.showError(error);
+    }
+    finally {
+        isBusy.value = false;
+    }
+
+
 }
 </script>
 
@@ -682,8 +825,8 @@ const cmdInput = (e:Event)=>{
                 <ol class="breadcrumb horow">
                     <div class="dropdown link" style="display: block;min-width: 100px;margin-right: 20px;">
                         <a data-toggle="dropdown" class="dropdown-toggle hdbutton" style="cursor: pointer;">{{
-                            ProjectListProperties.selectedAgentCategory ? ProjectListProperties.selectedAgentCategory :
-                            "所有服务器类别" }}
+            ProjectListProperties.selectedAgentCategory ? ProjectListProperties.selectedAgentCategory :
+                "所有服务器类别" }}
                             <span class="caret"></span></a>
                         <ul class="dropdown-menu dropdown-menu-list">
                             <li>
@@ -696,16 +839,16 @@ const cmdInput = (e:Event)=>{
                                     @click="ProjectListProperties.selectedAgentCategory = agent.Category; refreshAllCategories();"><i
                                         v-if="ProjectListProperties.selectedAgentCategory == agent.Category"
                                         class="fa falist fa-dot-circle-o"></i>{{
-                                            agent.Category }}</a>
+            agent.Category }}</a>
                             </li>
                         </ul>
                     </div>
 
                     <div class="dropdown link" style="display: block;min-width: 100px;margin-right: 20px;">
                         <a data-toggle="dropdown" class="dropdown-toggle hdbutton" style="cursor: pointer;">{{
-                            ProjectListProperties.selectedProjectCategory ?
-                            ProjectListProperties.selectedProjectCategory :
-                            "所有程序类别" }}
+            ProjectListProperties.selectedProjectCategory ?
+                ProjectListProperties.selectedProjectCategory :
+                "所有程序类别" }}
                             <span class="caret"></span></a>
                         <ul class="dropdown-menu dropdown-menu-list">
                             <li>
@@ -717,7 +860,7 @@ const cmdInput = (e:Event)=>{
                                 <a @click="ProjectListProperties.selectedProjectCategory = arr[1]">
                                     <i v-if="ProjectListProperties.selectedProjectCategory == arr[1]"
                                         class="fa falist fa-dot-circle-o"></i>{{
-                                            arr[1] }}</a>
+            arr[1] }}</a>
                             </li>
                         </ul>
                     </div>
@@ -727,13 +870,21 @@ const cmdInput = (e:Event)=>{
                 <div class="right" v-if="!editingModel">
                     <div class="btn-group" role="group" aria-label="...">
                         <button class="btn btn-light" @click="addClick">新部署程序</button>
+                        <button class="btn btn-light" @click="exportClick"><i class="fa fa-floppy-o"></i>{{ exporting ?
+            "确定导出" :
+            "导出部署" }}</button>
+                        <span class="btn btn-light" style="position: relative;"><i class="fa fa-share-square-o"></i>
+                            导入部署
+                            <input type="file" accept=".json" @change="onSelectedFile" ref="fileEle"
+                                style="position: absolute;left:0;top:0;right:0;bottom: 0;opacity: 0;">
+                        </span>
                         <a title="全局警报线设置" @click="globalAlarmSettingClick" class="btn btn-light"><i
                                 class="fa fa-shield"></i></a>
                         <a title="刷新" @click="refreshDatas" class="btn btn-light"><i class="fa fa-refresh"></i></a>
                     </div>
 
                     <div class="publishing" v-if="publishingInfo">
-                        正在部署：{{publishingInfo}}
+                        正在部署：{{ publishingInfo }}
                     </div>
                 </div>
                 <!-- End Page Header Right Div -->
@@ -757,7 +908,9 @@ const cmdInput = (e:Event)=>{
                             <table id="example0" class="table display">
                                 <thead>
                                     <tr>
-                                        <th></th>
+                                        <th>
+                                            <a style="cursor: pointer;" v-if="exporting" @click="selectAllExport">全选</a>
+                                        </th>
                                         <th>名称</th>
                                         <th>描述</th>
                                         <th>所属服务器</th>
@@ -773,12 +926,13 @@ const cmdInput = (e:Event)=>{
                                     <template v-for="item in datas">
                                         <tr :class="{ offline: item.OwnerServer.offline }"
                                             v-if="(!ProjectListProperties.selectedAgentCategory || ProjectListProperties.selectedAgentCategory == item.OwnerServer.Category) &&
-                                                (!ProjectListProperties.selectedProjectCategory || ProjectListProperties.selectedProjectCategory == item.Category)"
+            (!ProjectListProperties.selectedProjectCategory || ProjectListProperties.selectedProjectCategory == item.Category)"
                                             :title="`${item.OwnerServer.Category ? item.OwnerServer.Category : ''}-${item.Category ? item.Category : ''}`">
                                             <td>
-                                                <li class="dropdown" style="display: block;">
+                                                <li v-if="!exporting" class="dropdown" style="display: block;">
                                                     <a @mousedown="menuClick" data-toggle="dropdown"
-                                                        style="color:#555;white-space: nowrap;cursor: pointer;">. . .</a>
+                                                        style="color:#555;white-space: nowrap;cursor: pointer;">. .
+                                                        .</a>
                                                     <ul class="dropdown-menu dropdown-menu-list">
                                                         <li> <a @click="editClick(item)"><i
                                                                     class="fa falist fa-edit"></i>编辑</a>
@@ -828,28 +982,34 @@ const cmdInput = (e:Event)=>{
                                                         </li>
                                                     </ul>
                                                 </li>
+                                                <input v-else type="checkbox" v-model="item.isSelected"
+                                                    style="margin-top: -5px;">
                                             </td>
                                             <td>{{ item.Name }}</td>
                                             <td>{{ item.Desc }}</td>
                                             <td>{{ item.OwnerServer.Address }}:{{ item.OwnerServer.Port }}</td>
                                             <td>{{ item.User }}</td>
                                             <td>
-                                                <template v-if="item.RunType > 1 || (item.RunCmd && item.RunCmd.trim())">
+                                                <template
+                                                    v-if="item.RunType > 1 || (item.RunCmd && item.RunCmd.trim())">
                                                     <span v-if="item.ProcessId > 0 || item.ProcessId == -2"
-                                                        class="running">{{getRunTypeStr(item)}}</span>
-                                                    <span v-else class="stopped">{{getRunTypeStr(item)}}</span>
+                                                        class="running">{{ getRunTypeStr(item) }}</span>
+                                                    <span v-else class="stopped">{{ getRunTypeStr(item) }}</span>
                                                 </template>
                                             </td>
                                             <td>
-                                                <Percent class="percent" v-if="item.ProcessId > 0 || item.ProcessId == -2"
+                                                <Percent class="percent"
+                                                    v-if="item.ProcessId > 0 || item.ProcessId == -2"
                                                     :value="item.CpuPercent" />
                                             </td>
                                             <td>
-                                                <Percent class="percent" v-if="item.ProcessId > 0 || item.ProcessId == -2"
+                                                <Percent class="percent"
+                                                    v-if="item.ProcessId > 0 || item.ProcessId == -2"
                                                     :value="item.MemoryPercent" :under-value="item.MemoryLimit" />
                                             </td>
                                             <td>
-                                                <div v-html="item.Status ? item.Status.replace(/\n/g, '<br>') : ''"></div>
+                                                <div v-html="item.Status ? item.Status.replace(/\n/g, '<br>') : ''">
+                                                </div>
                                                 <div style="color: red;"
                                                     v-html="item.Error ? item.Error.replace(/\n/g, '<br>') : ''">
                                                 </div>
@@ -883,7 +1043,8 @@ const cmdInput = (e:Event)=>{
                         <div class="panel-title">
                             {{ editingModel.Guid ? "编辑部署信息" : "新增部署" }}
                             <ul class="panel-tools">
-                                <li><a @click="cancelClick" class="icon closed-tool"><i class="fa fa-times"></i></a></li>
+                                <li><a @click="cancelClick" class="icon closed-tool"><i class="fa fa-times"></i></a>
+                                </li>
                             </ul>
                         </div>
 
@@ -893,8 +1054,8 @@ const cmdInput = (e:Event)=>{
                                 <div class="form-group" v-if="!editingModel.Guid">
                                     <label for="input002" class="col-sm-3 control-label form-label">所属服务器 *</label>
                                     <div class="col-sm-9">
-                                        <Selector v-model="editingModel.OwnerServer.id" :datas="agents" text-member="Name"
-                                            value-member="id" />
+                                        <Selector v-model="editingModel.OwnerServer.id" :datas="agents"
+                                            text-member="Name" value-member="id" />
                                     </div>
                                 </div>
 
@@ -919,7 +1080,8 @@ const cmdInput = (e:Event)=>{
                                     <div class="col-sm-9">
                                         <div class="input-group">
                                             <input type="text" class="form-control" v-model="editingModel.Category">
-                                            <div data-toggle="dropdown" class="input-group-addon" style="cursor: pointer;">
+                                            <div data-toggle="dropdown" class="input-group-addon"
+                                                style="cursor: pointer;">
                                                 <i class="fa fa-sort-desc"></i>
                                             </div>
                                             <ul class="dropdown-menu dropdown-menu-list">
@@ -1009,7 +1171,8 @@ const cmdInput = (e:Event)=>{
                                         <div v-if="branches">
                                             <Selector v-model="editingModel.BranchName" :datas="branches" />
                                         </div>
-                                        <span id="helpBlock" class="help-block" v-if="isLoadingBranches">正在查询分支...</span>
+                                        <span id="helpBlock" class="help-block"
+                                            v-if="isLoadingBranches">正在查询分支...</span>
                                     </div>
                                 </div>
 
@@ -1082,7 +1245,8 @@ const cmdInput = (e:Event)=>{
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label form-label">命令脚本 *</label>
                                     <div class="col-sm-9">
-                                        <textarea class="form-control" ref="txtCmd" @input="cmdInput" style="height: 80px;overflow-y: auto;"
+                                        <textarea class="form-control" ref="txtCmd" @input="cmdInput"
+                                            style="height: 80px;overflow-y: auto;"
                                             v-model="editingModel.BuildCmd"></textarea>
                                         <span class="help-block">例如：dotnet publish
                                             "ProgramFolder/Program.csproj"
@@ -1097,8 +1261,7 @@ const cmdInput = (e:Event)=>{
                                     <label class="col-sm-3 control-label form-label">发布文件所在目录</label>
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" v-model="editingModel.BuildPath">
-                                        <span id="helpBlock"
-                                            class="help-block">这是<b>命令执行目录</b>的相对路径，此文件夹编译前会被清空</span>
+                                        <span id="helpBlock" class="help-block">这是<b>命令执行目录</b>的相对路径，此文件夹编译前会被清空</span>
 
                                     </div>
                                 </div>
@@ -1132,7 +1295,7 @@ const cmdInput = (e:Event)=>{
                                     </div>
                                 </div>
 
-                                <div class="form-group" v-if="(editingModel.RunType&2)==2">
+                                <div class="form-group" v-if="(editingModel.RunType & 2) == 2">
                                     <label class="col-sm-3 control-label form-label">网络配置</label>
                                     <div class="col-sm-9">
                                         <div class="radio radio-info radio-inline">
@@ -1150,7 +1313,8 @@ const cmdInput = (e:Event)=>{
                                     </div>
                                 </div>
 
-                                <div class="form-group" v-if="(editingModel.RunType&2)==2 && !editingModel.IsHostNetwork">
+                                <div class="form-group"
+                                    v-if="(editingModel.RunType & 2) == 2 && !editingModel.IsHostNetwork">
                                     <label class="col-sm-3 control-label form-label">容器端口映射</label>
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" v-model="editingModel.DockerPortMap">
@@ -1158,24 +1322,26 @@ const cmdInput = (e:Event)=>{
                                     </div>
                                 </div>
 
-                                <div class="form-group" v-if="(editingModel.RunType&2)==2">
+                                <div class="form-group" v-if="(editingModel.RunType & 2) == 2">
                                     <label class="col-sm-3 control-label form-label">容器文件夹映射</label>
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" v-model="editingModel.DockerFolderMap">
-                                        <span id="helpBlock" class="help-block">如 /data:/app/data ， "/home/my data":/myhome
+                                        <span id="helpBlock" class="help-block">如 /data:/app/data ， "/home/my
+                                            data":/myhome
                                             格式：宿主机目录:容器目录</span>
                                     </div>
                                 </div>
 
-                                <div class="form-group" v-if="(editingModel.RunType&2)==2">
+                                <div class="form-group" v-if="(editingModel.RunType & 2) == 2">
                                     <label class="col-sm-3 control-label form-label">环境变量设置</label>
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" v-model="editingModel.DockerEnvMap">
-                                        <span id="helpBlock" class="help-block">如 POSTGRES_PASSWORD=123456 ， POSTGRES_HOST_AUTH_METHOD=trust</span>
+                                        <span id="helpBlock" class="help-block">如 POSTGRES_PASSWORD=123456 ，
+                                            POSTGRES_HOST_AUTH_METHOD=trust</span>
                                     </div>
                                 </div>
 
-                                <div class="form-group" v-if="(editingModel.RunType&2)==2">
+                                <div class="form-group" v-if="(editingModel.RunType & 2) == 2">
                                     <label class="col-sm-3 control-label form-label">内存限制</label>
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" v-model="editingModel.MemoryLimit">
@@ -1185,7 +1351,7 @@ const cmdInput = (e:Event)=>{
 
 
 
-                                <div class="form-group" v-if="(editingModel.RunType&2)==2">
+                                <div class="form-group" v-if="(editingModel.RunType & 2) == 2">
                                     <label class="col-sm-3 control-label form-label">Dockerfile内容</label>
                                     <div class="col-sm-9">
                                         <span
@@ -1199,7 +1365,8 @@ const cmdInput = (e:Event)=>{
                                 <div style="text-align: right;">
                                     <button class="btn btn-default" type="button" @click="viewUrl">查看触发Url</button>
                                     &nbsp;&nbsp;&nbsp;&nbsp;
-                                    <button class="btn btn-default" type="button" @click="viewPublishPath">查看待上传路径</button>
+                                    <button class="btn btn-default" type="button"
+                                        @click="viewPublishPath">查看待上传路径</button>
                                     &nbsp;&nbsp;&nbsp;&nbsp;
                                     <button class="btn btn-default" type="button"
                                         @click="okClick">保&nbsp;&nbsp;&nbsp;&nbsp;存</button>
@@ -1208,7 +1375,7 @@ const cmdInput = (e:Event)=>{
                                         @click="cancelClick">取&nbsp;&nbsp;&nbsp;&nbsp;消</button>
                                 </div>
                                 <div v-if="publishPath" style="width: 100%;word-break: break-word;padding-top: 10px;">{{
-                                    publishPath }}</div>
+            publishPath }}</div>
                             </form>
 
                         </div>
@@ -1219,6 +1386,63 @@ const cmdInput = (e:Event)=>{
             </div>
             <!-- End 表单 -->
 
+        </div>
+        <div v-if="importing" class="pageContent editor">
+            <!-- Start 导入部署 表单  -->
+            <div class="row">
+
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+
+                        <div class="panel-title">
+                            导入程序
+                            <ul class="panel-tools">
+                                <li><a @click="cancelClick" class="icon closed-tool"><i class="fa fa-times"></i></a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="panel-body">
+                            <form class="form-horizontal">
+
+                                <div class="form-group">
+                                    <label for="input002" class="col-sm-3 control-label form-label">所属服务器 *</label>
+                                    <div class="col-sm-9">
+                                        <Selector v-model="importingServerId" :datas="agents" text-member="Name"
+                                            value-member="id" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input002" class="col-sm-3 control-label form-label">选择需要导入的程序</label>
+                                    <div class="col-sm-9">
+                                        <a style="cursor: pointer;" @click="selectAllImport">全选</a>
+                                        <div class="checkbox checkbox-primary" v-for="item in importing.Items">
+                                            <input id="checkbox102" type="checkbox" v-model="item.isSelected">
+                                            <label for="checkbox102">
+                                                {{item.Name}} ： {{ item.Desc }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div style="text-align: right;">
+                                    <button class="btn btn-default" type="button"
+                                        @click="okImportClick">确&nbsp;&nbsp;&nbsp;&nbsp;定</button>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                    <button class="btn" type="button"
+                                        @click="cancelClick">取&nbsp;&nbsp;&nbsp;&nbsp;消</button>
+                                </div>
+                            </form>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <!-- End 表单 -->
         </div>
     </div>
 </template>

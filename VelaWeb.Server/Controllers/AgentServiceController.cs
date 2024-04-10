@@ -358,6 +358,63 @@ namespace VelaWeb.Server.Controllers
             return project.Guid;
         }
 
+        /// <summary>
+        /// 导入工程
+        /// </summary>
+        /// <param name="project"></param>
+        /// <returns></returns>
+        /// <exception cref="ServiceException"></exception>
+        /// <exception cref="Exception"></exception>
+        [HttpPost]
+        public async Task<string> ImportProject([FromBody] ProjectModel project)
+        {
+            project.Guid = null;
+            project.GitUrl = project.GitUrl?.Trim();
+            project.GitUserName = project.GitUserName?.Trim();
+            project.GitRemote = project.GitRemote?.Trim();
+
+
+            var role = this.User.FindFirstValue(ClaimTypes.Role);
+
+            if (role != "Admin")
+            {
+                if (await _db.UserAgentPower.AnyAsync(m => m.UserId == this.UserId && m.AgentId == project.OwnerServer.id) == false)
+                {
+                    throw new ServiceException($"您无权进行此项操作");
+                }
+            }
+
+            var client = _httpClientFactory.CreateClient("");
+            project.UserId = this.UserId;
+            project.ProgramPath = project.ProgramPath?.Trim();
+            project.BuildCmd = project.BuildCmd?.Trim();
+            project.RunCmd = project.RunCmd?.Trim();
+            project.BuildPath = project.BuildPath?.Trim();
+
+            HttpContent content = new StringContent(project.ToJsonString());
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            using var response = await client.PostAsync($"https://{project.OwnerServer.Address}:{project.OwnerServer.Port}/Publish/AddProject", content);//改成自己的
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                var msg = await response.Content.ReadAsStringAsync();
+                throw new Exception(msg);
+            }
+
+            project.Guid = await response.Content.ReadAsStringAsync();
+            _projectCenter.OnProjectUpdate(project);
+
+            await _db.InsertAsync(new Logs
+            {
+                UserId = this.UserId,
+                Operation = "新增发布程序",
+                Time = DateTime.UtcNow,
+                Detail = project.Guid + "\r\n" + project.Name + " " + project.GitUrl
+            });
+
+
+            return project.Guid;
+        }
+
         [HttpPost]
         public async Task ModifyProject([FromBody] ProjectModel project)
         {
@@ -839,5 +896,27 @@ namespace VelaWeb.Server.Controllers
             await project.Restore(backupFileName);
         }
 
+        [HttpPost]
+        public async Task<string> ExportProjects([FromBody] string[] guids)
+        {
+            var items = _projectCenter.GetAllProjects().Where(m => guids.Contains(m.Guid)).ToArray();
+            Dictionary<string, string> dockerFiles = new Dictionary<string, string>();
+            foreach( var project in items)
+            {
+                try
+                {
+                    var dockerFile = await GetDockerfile(project.Guid);
+                    if (!string.IsNullOrWhiteSpace(dockerFile))
+                    {
+                        dockerFiles[project.Guid] = dockerFile;
+                    }
+                }
+                catch 
+                {
+ 
+                }
+            }
+            return new { Items = items, DockerFiles = dockerFiles }.ToJsonString(true);
+        }
     }
 }
