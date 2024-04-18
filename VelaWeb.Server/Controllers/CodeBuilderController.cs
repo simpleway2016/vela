@@ -331,10 +331,8 @@ namespace VelaWeb.Server.Controllers
 
             var codeParser = _codeParserFactory.CreateCodeParser(codeModel.Language);
             var ret = codeParser.Parser(code);
-            if (ret.Items.Count() == 1)
-                return ret.Items.First().ToJsonString(true);
-            else
-                return ret.ToJsonString(true);
+            
+            return ret.ToJsonString(true);
         }
 
         [HttpPost]
@@ -354,8 +352,6 @@ namespace VelaWeb.Server.Controllers
             var ret = codeParser.Parser(code);
             if (ret.Items == null)
                 return ret.ToString();
-            else if (ret.Items.Count() == 1)
-                return ret.Items.First().ToJsonString(true);
             else
                 return ret.ToJsonString(true);
         }

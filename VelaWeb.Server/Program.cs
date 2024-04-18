@@ -32,6 +32,7 @@ using Vela.CodeParser.CSharp;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using VelaWeb.Server.CodeParsers;
+using System.IO.Compression;
 
 namespace VelaWeb
 {
@@ -79,6 +80,32 @@ namespace VelaWeb
             }
 
             var services = builder.Services;
+
+            services.Configure<BrotliCompressionProviderOptions>(options =>
+            {
+                options.Level = CompressionLevel.Optimal;
+            });
+
+            services.Configure<GzipCompressionProviderOptions>(options =>
+            {
+                options.Level = CompressionLevel.Optimal;
+            });
+            services.AddResponseCompression(options =>
+            {
+                //options.EnableForHttps = true;
+                // 添加br与gzip的Provider
+                options.Providers.Add<BrotliCompressionProvider>();
+                options.Providers.Add<GzipCompressionProvider>();
+                // 扩展一些类型 (MimeTypes中有一些基本的类型,可以打断点看看)
+                options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
+                {
+                    "text/html; charset=utf-8",
+                    "application/xhtml+xml",
+                    "application/atom+xml",
+                    "image/svg+xml"
+                });
+            });
+
             services.AddSingleton<IGitService, DefaultGitService>();
             if (OperatingSystem.IsWindows())
             {
@@ -173,6 +200,7 @@ namespace VelaWeb
             builder.Services.AddControllers();
 
             var app = builder.Build();
+            app.UseResponseCompression();//开启gzip
             app.UseCors("abc");
 
             Global.Init(app.Services);
