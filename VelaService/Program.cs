@@ -14,15 +14,16 @@ namespace VelaService
         {
             Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-            if (File.Exists("./VelaServiceConfig.json") == false)
-            {
-                throw new Exception($"没有找到{Path.GetFullPath("VelaServiceConfig.json")}文件");
-            }
-            var modelJson = File.ReadAllText("./VelaServiceConfig.json", Encoding.UTF8);
-            _config = System.Text.Json.JsonSerializer.Deserialize<ServiceConfigModel>(modelJson);
-
             if (args == null || args.Length == 0)
             {
+                if (File.Exists("./VelaServiceConfig.json") == false)
+                {
+                    throw new Exception($"没有找到{Path.GetFullPath("VelaServiceConfig.json")}文件");
+                }
+
+                var modelJson = File.ReadAllText("./VelaServiceConfig.json", Encoding.UTF8);
+                _config = System.Text.Json.JsonSerializer.Deserialize<ServiceConfigModel>(modelJson);
+
                 if (OperatingSystem.IsWindows())
                 {
                     windowsSetup();
@@ -34,6 +35,22 @@ namespace VelaService
             }
             else if(args.Contains("-exec"))
             {
+                if (File.Exists("./VelaServiceConfig.setup.json"))
+                {
+                    var modelJson = File.ReadAllText("./VelaServiceConfig.setup.json", Encoding.UTF8);
+                    _config = System.Text.Json.JsonSerializer.Deserialize<ServiceConfigModel>(modelJson);
+                }
+                else
+                {
+                    if (File.Exists("./VelaServiceConfig.json") == false)
+                    {
+                        throw new Exception($"没有找到{Path.GetFullPath("VelaServiceConfig.json")}文件");
+                    }
+
+                    var modelJson = File.ReadAllText("./VelaServiceConfig.json", Encoding.UTF8);
+                    _config = System.Text.Json.JsonSerializer.Deserialize<ServiceConfigModel>(modelJson);
+                }
+
                 AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
                 string filename;
@@ -160,7 +177,7 @@ namespace VelaService
                 _config.ExecStart = "\"" + _config.WorkDir + _config.ExecStart.Substring(2);
             }
 
-            File.WriteAllText(serviceFolder + "/VelaServiceConfig.json", System.Text.Json.JsonSerializer.Serialize(_config), Encoding.UTF8);
+            File.WriteAllText(serviceFolder + "/VelaServiceConfig.setup.json", System.Text.Json.JsonSerializer.Serialize(_config), Encoding.UTF8);
 
             Console.WriteLine($"程序安装到：{workFolder}");
             Console.WriteLine($"服务安装到：{serviceFolder}");
