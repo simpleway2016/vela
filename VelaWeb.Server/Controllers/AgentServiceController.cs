@@ -629,8 +629,15 @@ namespace VelaWeb.Server.Controllers
         }
 
         [HttpGet]
-        public void StopBuild(string guid)
+        public async Task StopBuild(string guid)
         {
+            var project = _projectCenter.GetProject(guid);
+            var client = _httpClientFactory.CreateClient("");
+            var response = await client.GetAsync($"https://{project.OwnerServer.Address}:{project.OwnerServer.Port}/Publish/StopBuild?guid={project.Guid}");
+            var ret = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+                throw new ServiceException(ret);
+
             _projectCenter.StopBuild(guid);
         }
 

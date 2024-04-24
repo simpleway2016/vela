@@ -21,6 +21,7 @@ namespace VelaAgent.Infrastructures.ProjectRunners
         ICmdRunner _cmdRunner;
         IProcessService _processService;
         IDockerEngine _dockerEngine;
+        ProjectTtyWorker _ProjectTtyWorker;
         Process _process;
 
         TtySize _lastTtySize = new TtySize()
@@ -35,7 +36,7 @@ namespace VelaAgent.Infrastructures.ProjectRunners
             _processService = Global.ServiceProvider.GetRequiredService<IProcessService>();
             _logger = Global.ServiceProvider.GetRequiredService<ILogger<ProgramRunner>>();
             _dockerEngine = Global.ServiceProvider.GetRequiredService<IDockerEngine>();
-
+            _ProjectTtyWorker = Global.ServiceProvider.GetRequiredService<ProjectTtyWorker>();
             Project = project;
         }
 
@@ -157,6 +158,7 @@ namespace VelaAgent.Infrastructures.ProjectRunners
                         var worker = Global.ServiceProvider.GetRequiredService<TtyWorker>();
                         try
                         {
+                            _ProjectTtyWorker[Project.Guid] = worker;
                             if (InfoOutput != null && InfoOutput.Cols > 0 && InfoOutput.Rows > 0)
                             {
                                 await worker.Init(Project.Guid, InfoOutput.Cols, InfoOutput.Rows);
@@ -189,6 +191,7 @@ namespace VelaAgent.Infrastructures.ProjectRunners
                         }
                         finally
                         {
+                            _ProjectTtyWorker.TryRemove(Project.Guid, out _);
                             worker?.Dispose();
                         }
                         //await _dockerEngine.Build(InfoOutput, publishPath, imageName , (text) => { 

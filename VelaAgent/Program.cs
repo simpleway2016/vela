@@ -100,6 +100,7 @@ namespace VelaAgent
             services.AddControllers();
             services.AddScoped<SysDBContext>();
             services.AddSingleton<ICertificateService, DefaultCertificateService>();
+            services.AddSingleton<ProjectTtyWorker>();
             if (OperatingSystem.IsWindows())
             {
                 services.AddSingleton<ICmdRunner, WindowsCmdRunner>();

@@ -55,15 +55,21 @@ namespace VelaLib.Windows
 
         public void SendCommand(string command)
         {
-            writer.Write(Encoding.UTF8.GetBytes(command));
-            writer.WriteByte(13);
-            writer.Flush();
+            lock (writer)
+            {
+                writer.Write(Encoding.UTF8.GetBytes(command));
+                writer.WriteByte(13);
+                writer.Flush();
+            }
         }
 
         public void SendKill()
         {
-            writer.WriteByte(0x03);
-            writer.Flush();
+            lock (writer)
+            {
+                writer.WriteByte(0x03);
+                writer.Flush();
+            }
         }
 
         private void DisposeResources(params IDisposable[] disposables)
@@ -75,7 +81,7 @@ namespace VelaLib.Windows
         }
 
         public void Dispose()
-        {           
+        {
             DisposeResources(reader, writer, process, pseudoConsole, outputPipe, inputPipe);
             KillProcess();
         }

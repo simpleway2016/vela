@@ -29,12 +29,14 @@ namespace VelaAgent.Controllers
         private readonly ILogger<PublishController> _logger;
         private readonly IDockerEngine _dockerEngine;
         private readonly ProjectBackup _projectBackup;
+        private readonly ProjectTtyWorker _projectTtyWorker;
         private readonly IFileService _fileService;
         private readonly KeepProcessAliveFactory _keepProcessAliveFactory;
 
         public PublishController(SysDBContext db, IProcessService processService, ICmdRunner cmdRunner,
             ILogger<PublishController> logger, IDockerEngine dockerEngine,
             ProjectBackup projectBackup,
+            ProjectTtyWorker projectTtyWorker,
             IFileService fileService,
             KeepProcessAliveFactory keepProcessAliveFactory)
         {
@@ -44,6 +46,7 @@ namespace VelaAgent.Controllers
             _logger = logger;
             _dockerEngine = dockerEngine;
             _projectBackup = projectBackup;
+            _projectTtyWorker = projectTtyWorker;
             _fileService = fileService;
             _keepProcessAliveFactory = keepProcessAliveFactory;
         }
@@ -466,6 +469,15 @@ namespace VelaAgent.Controllers
 
             project.IsStopped = true;
             await _db.UpdateAsync(project);
+        }
+
+        [HttpGet]
+        public async Task StopBuild(string guid)
+        {
+            if(_projectTtyWorker.TryGetValue(guid , out TtyWorker worker))
+            {
+                await worker.Kill();
+            }
         }
 
         /// <summary>

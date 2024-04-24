@@ -109,15 +109,21 @@ namespace VelaLib.Linux
 
         public void SendCommand(string command)
         {
-            inputStream.Write(Encoding.UTF8.GetBytes(command));
-            inputStream.WriteByte(13);
-            inputStream.Flush();
+            lock (inputStream)
+            {
+                inputStream.Write(Encoding.UTF8.GetBytes(command));
+                inputStream.WriteByte(13);
+                inputStream.Flush();
+            }
         }
 
         public void SendKill()
         {
-            inputStream.WriteByte(0x03);
-            inputStream.Flush();
+            lock (inputStream)
+            {
+                inputStream.WriteByte(0x03);
+                inputStream.Flush();
+            }
         }
 
         public void KillProcess()
