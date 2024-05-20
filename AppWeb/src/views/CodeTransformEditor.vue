@@ -150,6 +150,8 @@ const saveAndTransform = async () => {
         var scriptMethod = await GlobalInfo.get("/CodeBuilder/GetVueMethod", null);
         eval("scriptMethod=" + scriptMethod);
 
+        scriptMethod.___nothing = ()=>"";
+
         var data = new FormData();
         data.append("id", props.modelValue);
         data.append("script", editorScript.getValue());
@@ -157,7 +159,8 @@ const saveAndTransform = async () => {
 
         var root = document.createElement("DIV");
         var childDiv = document.createElement("DIV");
-        childDiv.innerHTML = editorScript.getValue();
+        //创建一个self变量，等于this.$data，因为this.$data在里面嵌套中无法访问到
+        childDiv.innerHTML = "{{___nothing(self=this.$data)}}\r\n" + editorScript.getValue();
         root.appendChild(childDiv);
 
         var list: any;
@@ -234,6 +237,7 @@ const copy = (char: any) => {
         <div class="page-header">
             <h1 class="title">代码转换</h1>
             <ol class="breadcrumb horow">
+                self 等同于 this.$data 这个顶级变量<br>
                 常用字符转义（_cUTF8编码值_）：
                 <template v-for="citem, index in simpleChars">
                     <span style="color:green;" @click="copy(citem)" v-html="simpleCharsText[index]"></span>&nbsp;=&nbsp;
