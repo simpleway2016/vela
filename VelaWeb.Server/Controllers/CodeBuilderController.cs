@@ -366,6 +366,9 @@ namespace VelaWeb.Server.Controllers
             {
                 code = @"{
     findNode : function(parentNode,nodeType,name){
+        if(name && name.endsWith(""?""))
+        name = name.substr(0,name.length - 1);
+
         if(!parentNode) return null;
         if(parentNode.NodeType == nodeType && (!name || parentNode.Name == name))
             return parentNode;
