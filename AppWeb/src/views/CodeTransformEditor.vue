@@ -11,8 +11,8 @@ const emit = defineEmits(['update:modelValue']);
 const containerEle = ref(<HTMLElement><any>null);
 const scriptContainerEle = ref(<HTMLElement><any>null);
 
-const simpleChars = ref(['<', '>', '{', '}', ':', '@', 'v']);
-const simpleCharsText = ref(["&lt;", "&gt;", '{', '}', ':', '@', 'v']);
+const simpleChars = ref(['<', '>', '{', '}', ':', '@', 'v','"','&']);
+const simpleCharsText = ref(["&lt;", "&gt;", '{', '}', ':', '@', 'v','"','&']);
 
 const value = ref('')
 const language = ref('html')
