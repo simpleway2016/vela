@@ -161,7 +161,7 @@ namespace VelaAgent.Infrastructures
                     ret = ret.Split('\n').Select(m => m.Trim()).Where(m => m.Length > 0).ToArray()[1];
                     var strArr = ret.Split(' ').Select(m => m.Trim()).Where(m => m.Length > 0).ToArray();
                     runningInfo.CpuPercent = Math.Round( double.Parse(strArr[0]) / Environment.ProcessorCount , 2);
-                    runningInfo.MemoryPercent = Math.Round(double.Parse(strArr[0]) , 2);
+                    runningInfo.MemoryPercent = Math.Round(double.Parse(strArr[1]) , 2);
                 }
                 catch
                 {
