@@ -128,12 +128,12 @@ namespace VelaAgent.Controllers
                         try
                         {
                             await this.Output(workdir);
-                            await _fileService.ChmodAll(workdir, "+x");
-                            await this.Output($"chmod -R +x * 成功");
+                            await _fileService.ChmodAll(workdir, "u+x");
+                            await this.Output($"chmod -R u+x * 成功");
                         }
                         catch (Exception ex)
                         {
-                            await this.Output($"chmod -R +x * 失败");
+                            await this.Output($"chmod -R u+x * 失败");
                             await this.Output(ex.Message);
                         }
 
