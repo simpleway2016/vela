@@ -1,5 +1,6 @@
 ﻿using VelaLib;
 using System.Diagnostics;
+using System.Text;
 
 namespace VelaLib
 {
@@ -29,37 +30,44 @@ namespace VelaLib
                 {
 
                 }
-                var errInfo = $"{info1} Chmod error:{process.ExitCode}\r\n{info2}";
+                var errInfo = $"{info1}\r\n{info2}";
                 throw new Exception(errInfo);
             }
         }
 
         public async Task ChmodAll(string workdir, string action)
         {
-            using var process = new LinuxCmdRunner().RunInBash(workdir , $"chmod -R {action} *");
-            await process.WaitForExitAsync();
-            if (process.ExitCode != 0)
+            if (workdir == null)
+                workdir = "./";
+
+            StringBuilder errs = new StringBuilder();
+            await ChmodFolderAll(workdir, action, errs);
+            if (errs.Length > 0)
             {
-                string info1 = null;
-                string info2 = null;
+                var msg = errs.ToString();
+                errs.Clear();
+                throw new Exception(msg);
+            }
+        }
+
+        async Task ChmodFolderAll(string folder, string action, StringBuilder errs)
+        {
+           
+            var subFolders = Directory.GetDirectories(folder);
+            foreach (var subFolder in subFolders) {
+                await ChmodFolderAll(subFolder, action, errs);
+            }
+
+            var files = Directory.GetFiles(folder);
+            foreach (var file in files) {
                 try
                 {
-                    info1 = process.StandardOutput.ReadToEnd();
+                    await Chmod(file, action);
                 }
-                catch
+                catch (Exception ex)
                 {
-
+                    errs.AppendLine($"chmod {action} {file} 失败");
                 }
-                try
-                {
-                    info2 = process.StandardError.ReadToEnd();
-                }
-                catch
-                {
-
-                }
-                var errInfo = $"{info1} Chmod error:{process.ExitCode}\r\n{info2}";
-                throw new Exception(errInfo);
             }
         }
     }
