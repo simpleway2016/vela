@@ -121,40 +121,13 @@ namespace VelaAgent.Controllers
                     string ret = "0";
                     if (!string.IsNullOrEmpty(keepAliveObj.Project.RunCmd) || keepAliveObj.Project.RunType != Project_RunTypeEnum.Program)
                     {
-                        try
-                        {
-                            if (keepAliveObj.Project.RunType == Project_RunTypeEnum.Program)
-                            {
-                                var cmd = keepAliveObj.Project.RunCmd.Trim();
-                                if (cmd.StartsWith("nohup ") && cmd.Length > 6)
-                                    cmd = cmd.Substring(6).Trim();
+                        var workdir = publishPath;
+                        if (workdir.StartsWith("./"))
+                            workdir = Path.GetFullPath(workdir, AppDomain.CurrentDomain.BaseDirectory);
 
-                                var runfilename = _cmdRunner.GetRunFileName(cmd);
-                                runfilename = Path.Combine(publishPath, runfilename);
-                                if (runfilename.StartsWith("./"))
-                                    runfilename = Path.GetFullPath(runfilename, AppDomain.CurrentDomain.BaseDirectory);
-
-                                if (System.IO.File.Exists(runfilename))
-                                {
-                                    await this.Output($"chmod +x \"{runfilename}\"");
-                                    await _fileService.Chmod(runfilename, "+x");
-                                    await this.Output($"chmod +x \"{runfilename}\" 成功");
-                                }
-                                else
-                                {
-                                    await this.Output($"没有找到{runfilename},chmod 忽略");
-                                }
-                            }
-                        }
-                        catch (ServiceException)
-                        {
-                            throw;
-                        }
-                        catch (Exception ex)
-                        {
-                            await this.Output($"尝试设置chmod出错，{ex.Message}");
-                            _logger.LogError(ex, "尝试设置chmod出错");
-                        }
+                        await this.Output(workdir);
+                        await _fileService.ChmodAll(workdir, "+x");
+                        await this.Output($"chmod -R +x * 成功");
 
                         //await this.Output($"IsFirstUpload:{keepAliveObj.Project.IsFirstUpload}  ConfigFiles:{keepAliveObj.Project.ConfigFiles}");
                         try

@@ -239,17 +239,15 @@ namespace VelaLib
             {
                 var cmdStringItem = cmds[i];
 
-                if(i > 0)
-                {
-                    shBuilder.Append("exit_code=$?\n");
-                }
+                shBuilder.Append(cmdStringItem);
+                shBuilder.Append('\n');
+                shBuilder.Append("exit_code=$?\n");
 
                 shBuilder.Append("if [ $exit_code -ne 0 ]; then\n");
                 shBuilder.Append("  exit $exit_code\n");
                 shBuilder.Append("else\n  ");
                 shBuilder.Append($"echo \"<b>{cmdStringItem.Replace("\"","\\\"")}</b>\"\n");
-                shBuilder.Append(cmdStringItem);
-                shBuilder.Append('\n');
+              
                 shBuilder.Append("fi\n\n");
             }
 
