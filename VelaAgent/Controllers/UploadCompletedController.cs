@@ -125,9 +125,17 @@ namespace VelaAgent.Controllers
                         if (workdir.StartsWith("./"))
                             workdir = Path.GetFullPath(workdir, AppDomain.CurrentDomain.BaseDirectory);
 
-                        await this.Output(workdir);
-                        await _fileService.ChmodAll(workdir, "+x");
-                        await this.Output($"chmod -R +x * 成功");
+                        try
+                        {
+                            await this.Output(workdir);
+                            await _fileService.ChmodAll(workdir, "+x");
+                            await this.Output($"chmod -R +x * 成功");
+                        }
+                        catch (Exception ex)
+                        {
+                            await this.Output($"chmod -R +x * 失败");
+                            await this.Output(ex.Message);
+                        }
 
                         //await this.Output($"IsFirstUpload:{keepAliveObj.Project.IsFirstUpload}  ConfigFiles:{keepAliveObj.Project.ConfigFiles}");
                         try
