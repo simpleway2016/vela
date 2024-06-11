@@ -170,7 +170,7 @@
 
 //        public async Task Build(IInfoOutput infoOutput, string projectPath, string imageName)
 //        {
-//            var process = _cmdRunner.Run(projectPath, $"docker build -t {imageName} .");
+//            using var process = _cmdRunner.Run(projectPath, $"docker build -t {imageName} .");
 //            readOutput(process, infoOutput);
 //            readError(process, infoOutput);
 //            await process.WaitForExitAsync();

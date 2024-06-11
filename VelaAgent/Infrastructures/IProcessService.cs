@@ -15,7 +15,7 @@ namespace VelaAgent.Infrastructures
     {
         public  void Kill(int processId)
         {
-            var process = System.Diagnostics.Process.GetProcessById(processId);
+            using var process = System.Diagnostics.Process.GetProcessById(processId);
             if (process != null)
             {
                 if (!process.CloseMainWindow())
@@ -127,9 +127,10 @@ namespace VelaAgent.Infrastructures
         }
         public virtual void Kill(int processId)
         {
-            if (System.Diagnostics.Process.Start("kill", $"-15 {processId}").WaitForExit(10000) == false)
+            using var p1 = System.Diagnostics.Process.Start("kill", $"-15 {processId}");
+            if (p1.WaitForExit(10000) == false)
             {
-                var process = System.Diagnostics.Process.GetProcessById(processId);
+                using var process = System.Diagnostics.Process.GetProcessById(processId);
                 if (process != null)
                 {
                     process.Kill();
@@ -155,7 +156,7 @@ namespace VelaAgent.Infrastructures
                 //ps -p 1149 -o pcpu,pmem
                 try
                 {
-                    var process = _cmdRunner.Run(null, $"ps -p {processIds[i]} -o pcpu,pmem");
+                    using var process = _cmdRunner.Run(null, $"ps -p {processIds[i]} -o pcpu,pmem");
                     process.WaitForExit();
                     var ret = process.StandardOutput.ReadToEnd();
                     ret = ret.Split('\n').Select(m => m.Trim()).Where(m => m.Length > 0).ToArray()[1];

@@ -48,7 +48,7 @@ namespace VelaAgent
                 };
 
 
-                var process = System.Diagnostics.Process.Start(startInfo);
+                using var process = System.Diagnostics.Process.Start(startInfo);
                 process.WaitForExit();
                 var t1 = process.StandardOutput.ReadToEnd();
                 var m = Regex.Match(t1, "uid=(?<n>[0-9]+)");

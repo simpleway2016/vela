@@ -70,7 +70,7 @@ namespace VelaWeb.Server.Models
                 if (string.IsNullOrWhiteSpace(agentName))
                     agentName = this.Desc;
 
-                var process = cmdRunner.RunInBashWithoutStop(null, setting.Cmd.Replace("%NAME%", projectModel.Name)
+                using var process = cmdRunner.RunInBashWithoutStop(null, setting.Cmd.Replace("%NAME%", projectModel.Name)
                     .Replace("%SERVERNAME%", agentName)
                     .Replace("%CPU%", runningInfo.CpuPercent + "%").Replace("%MEMORY%", runningInfo.MemoryPercent + "%"));
             }

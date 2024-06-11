@@ -18,7 +18,7 @@ namespace VelaAgent.Infrastructures
         }
         public async Task Build(IInfoOutput infoOutput, string projectPath, string imageName, Action<string> outputInfoHandler)
         {
-            var process = _cmdRunner.Run(projectPath, $"docker build -t {imageName} .");
+            using var process = _cmdRunner.Run(projectPath, $"docker build -t {imageName} .");
             ReadOutputInfo(outputInfoHandler,process);
             ReadErrorInfo(outputInfoHandler, process);
             await process.WaitForExitAsync();

@@ -313,11 +313,29 @@ namespace VelaService
 
         static void Chmod(string filepath, string action)
         {
-            var process = Process.Start("chmod", $"{action} \"{filepath}\"");
+            using var process = Process.Start("chmod", $"{action} \"{filepath}\"");
             process.WaitForExit();
             if (process.ExitCode != 0)
             {
-                var errInfo = $"{process.StandardOutput.ReadToEnd()}\r\n{process.StandardError.ReadToEnd()}";
+                string info1 = null;
+                string info2 = null;
+                try
+                {
+                    info1 = process.StandardOutput.ReadToEnd();
+                }
+                catch
+                {
+
+                }
+                try
+                {
+                    info2 = process.StandardError.ReadToEnd();
+                }
+                catch
+                {
+
+                }
+                var errInfo = $"{info1}\r\n{info2}";
                 throw new Exception(errInfo);
             }
         }
