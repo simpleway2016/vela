@@ -155,6 +155,11 @@ namespace VelaWeb.Server
             return _projectDict.Where(m => m.Value.GetGitHash() == gitHash).Select(m => m.Value).ToArray();
         }
 
+        public ProjectModel[] GetAllProjectsByServerAddress(string address,int port)
+        {
+            return _projectDict.Where(m => m.Value.OwnerServer != null && (m.Value.OwnerServer.Address == address && m.Value.OwnerServer.Port == port)).Select(m => m.Value).ToArray();
+        }
+
         /// <summary>
         /// 查询指定git是否有自动发布的程序
         /// </summary>

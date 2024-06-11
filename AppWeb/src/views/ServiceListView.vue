@@ -467,8 +467,11 @@ const deleteClick = async (item: any) => {
         isBusy.value = true;
         try {
             await GlobalInfo.postJson("/AgentService/DeleteProject", item);
-            var index = datas.value.findIndex(x => x.id == item.id);
-            datas.value.splice(index, 1);
+            var index = datas.value.findIndex(x => x.Guid == item.Guid);
+            if(index >= 0)
+            {
+                datas.value.splice(index, 1);
+            }
         } catch (error) {
             GlobalInfo.showError(error);
         }
@@ -787,12 +790,21 @@ const okImportClick = async () => {
 
 
             var dockerfileContent = importing.value.DockerFiles[oldguid];
-
+            var configFiles = importing.value.ConfigFiles[oldguid];
 
             //保存dockerfile
             if (dockerfileContent) {
                 await GlobalInfo.post("/AgentService/SaveDockerfile", { guid: item.Guid, content: dockerfileContent });
             }
+
+            //保存配置文件
+            if(configFiles)
+            {
+                for(var path in configFiles){
+                    await GlobalInfo.post("/AgentService/SaveConfigContent", { guid: item.Guid, filename: path, content: configFiles[path] });
+                }
+            }
+           
         }
 
         //刷新程序分类列表
@@ -1418,8 +1430,8 @@ const okImportClick = async () => {
                                     <div class="col-sm-9">
                                         <a style="cursor: pointer;" @click="selectAllImport">全选</a>
                                         <div class="checkbox checkbox-primary" v-for="item in importing.Items">
-                                            <input id="checkbox102" type="checkbox" v-model="item.isSelected">
-                                            <label for="checkbox102">
+                                            <input :id="'chk'+item.Guid" type="checkbox" v-model="item.isSelected">
+                                            <label :for="'chk'+item.Guid">
                                                 {{item.Name}} ： {{ item.Desc }}
                                             </label>
                                         </div>

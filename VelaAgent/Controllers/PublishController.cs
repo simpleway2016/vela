@@ -574,6 +574,11 @@ namespace VelaAgent.Controllers
             }
             filename = Path.Combine(publishPath, filename);
 
+            var dirPath = Path.GetDirectoryName(filename);
+            if (Directory.Exists(dirPath) == false){
+                Directory.CreateDirectory(dirPath);
+            }
+
             await System.IO.File.WriteAllTextAsync(filename, content, Encoding.UTF8);
 
             project.FileHasUpdated = true;

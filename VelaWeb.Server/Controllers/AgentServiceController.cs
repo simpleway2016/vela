@@ -384,6 +384,27 @@ namespace VelaWeb.Server.Controllers
                 }
             }
 
+            var existProjects = _projectCenter.GetAllProjectsByServerAddress(project.OwnerServer.Address, project.OwnerServer.Port);
+            while (true)
+            {
+                //检查名称重复
+               if(existProjects.Any(m=>string.Equals(m.Name?.Trim(), project.Name?.Trim() , StringComparison.OrdinalIgnoreCase)))
+                {
+                    if(project.Name == null)
+                    {
+                        project.Name = "Copy";
+                    }
+                    else
+                    {
+                        project.Name += "Copy";
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+
             var client = _httpClientFactory.CreateClient("");
             project.UserId = this.UserId;
             project.ProgramPath = project.ProgramPath?.Trim();
@@ -908,10 +929,12 @@ namespace VelaWeb.Server.Controllers
         {
             var items = _projectCenter.GetAllProjects().Where(m => guids.Contains(m.Guid)).ToArray();
             Dictionary<string, string> dockerFiles = new Dictionary<string, string>();
-            foreach( var project in items)
+            Dictionary<string, Dictionary<string, string>> configFiles = new Dictionary<string, Dictionary<string, string>>();
+            foreach ( var project in items)
             {
                 try
                 {
+                    //输出dockerfile内容
                     var dockerFile = await GetDockerfile(project.Guid);
                     if (!string.IsNullOrWhiteSpace(dockerFile))
                     {
@@ -922,8 +945,30 @@ namespace VelaWeb.Server.Controllers
                 {
  
                 }
+
+                //输出配置文件
+                var filePaths = project.ConfigFiles?.Split(',').Select(m => m.Trim()).Where(m => m.Length > 0).ToArray();
+                if(filePaths != null && filePaths.Length > 0)
+                {
+                    var fileDict = new Dictionary<string, string>();
+                    configFiles[project.Guid] = fileDict;
+                    foreach (var filePath in filePaths) {
+                        try
+                        {
+                            var content = await GetConfigContent(project.Guid, filePath);
+                            if(!string.IsNullOrWhiteSpace(content))
+                            {
+                                fileDict[filePath] = content;
+                            }                           
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                }
             }
-            return new { Items = items, DockerFiles = dockerFiles }.ToJsonString(true);
+            return new { Items = items, DockerFiles = dockerFiles, ConfigFiles = configFiles }.ToJsonString(true);
         }
     }
 }
