@@ -7,6 +7,7 @@ using VelaWeb.Server.DBModels;
 using VelaWeb.Server.Dtos;
 using Way.EntityDB;
 using Way.Lib;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VelaWeb.Server.Controllers
 {
@@ -43,6 +44,48 @@ namespace VelaWeb.Server.Controllers
                         Language = m.Language,
                         Type = (CodeMissionDto_TypeEnum)m.Type
                     }).ToArrayAsync();
+        }
+
+        [HttpGet]
+        public Task<CodeMission[]> GetAllItems()
+        {
+            return (from m in _db.CodeMission
+                    where m.UserId == this.UserId
+                    orderby m.Type, m.Name
+                    select m).ToArrayAsync();
+        }
+
+        [HttpPost]
+        public async Task ImportItems(long? parentId, [FromBody] CodeMission[] codeMissions)
+        {
+            await _db.BeginTransactionAsync();
+            long? importingTopParentId = null;
+            if (codeMissions.Any(m => m.ParentId == null) == false)
+                importingTopParentId = codeMissions.Min(m => m.ParentId.Value);
+
+            await importItems(parentId, codeMissions, importingTopParentId);
+
+            await _db.CommitTransactionAsync();
+        }
+
+        async Task importItems(long? parentId, CodeMission[] codeMissions,long? missionsParentId)
+        {
+            var path = await getParentPath(parentId);
+            var datas = codeMissions.Where(m => m.ParentId == missionsParentId);
+            foreach (var data in datas)
+            {
+                var oldid = data.id;
+                data.ParentId = parentId;
+                data.UserId = this.UserId;
+                data.Path = path;
+                while ( await _db.CodeMission.AnyAsync(m=>m.Name == data.Name && m.ParentId == parentId && m.Type == data.Type))
+                {
+                    data.Name += "Copy";
+                }
+                await _db.InsertAsync(data);
+
+                await importItems(data.id, codeMissions, oldid);
+            }
         }
 
         [HttpGet]

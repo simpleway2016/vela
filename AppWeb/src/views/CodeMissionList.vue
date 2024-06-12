@@ -258,6 +258,70 @@ const parseClick = async () => {
     }
 }
 
+const exportAllClick = async ()=>{
+    isBusy.value = true;
+    try {
+        var content = await GlobalInfo.get("/CodeBuilder/GetAllItems", null);
+        
+        const blob = new Blob([content], { type: 'text/plain' });
+
+        // 创建一个链接元素用于下载
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = URL.createObjectURL(blob);
+        a.download = "代码转换备份.json";
+
+        // 将链接元素添加到文档中，并触发点击事件
+        document.body.appendChild(a);
+        a.click();
+
+        // 移除链接元素，释放URL对象
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+    } catch (error) {
+        GlobalInfo.showError(error);
+    }
+    finally {
+        isBusy.value = false;
+    }
+}
+
+const fileEle = ref(<HTMLInputElement><any>null);
+const onSelectedFile = async () => {
+    if (fileEle.value.files?.length) {
+        const reader = new FileReader();
+
+        reader.onload = async (e: any) => {
+            fileEle.value.value = "";
+            try {
+                const obj = JSON.parse(e.target.result);
+
+                if (!obj.length) {
+                    GlobalInfo.showError("文件里没有任何脚本");
+                    return;
+                }
+
+                 isBusy.value = true;
+                 await GlobalInfo.postJson("/CodeBuilder/ImportItems?parentId=" + (parentId?parentId:""), obj);
+                 GlobalInfo.toast("成功导入");
+                 isBusy.value = false;
+                 
+                 refreshDatas();
+            } catch (error) {
+                isBusy.value = false;
+                GlobalInfo.showError(error);
+            }
+        };
+
+        reader.onerror = () => {
+            fileEle.value.value = "";
+            GlobalInfo.showError("读取文件错误");
+        };
+
+        reader.readAsText(fileEle.value.files[0]);
+    }
+}
+
 </script>
 
 <template>
@@ -285,6 +349,12 @@ const parseClick = async () => {
                     <button class="btn btn-light" @click="addClick">新增项</button>
                     <button class="btn btn-light" @click="vueMethodClick">Vue方法体</button>
                     <button class="btn btn-light" @click="parseClick" v-if="copyId">粘贴</button>
+                    <button class="btn btn-light" @click="exportAllClick" v-if="parentId==null">全部导出</button>
+                    <span class="btn btn-light" style="position: relative;"><i class="fa fa-share-square-o"></i>
+                            导入
+                            <input type="file" accept=".json" @change="onSelectedFile" ref="fileEle"
+                                style="position: absolute;left:0;top:0;right:0;bottom: 0;opacity: 0;">
+                        </span>
                     <a @click="refreshDatas" class="btn btn-light" title="刷新列表"><i class="fa fa-refresh"></i></a>
                 </div>
             </div>

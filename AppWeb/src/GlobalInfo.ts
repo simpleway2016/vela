@@ -1,6 +1,6 @@
 import { ref, reactive } from "vue"
 import type { WebSocketConnection } from "./WebSocketConnection";
-import { POSITION, useToast } from "vue-toastification";
+import { POSITION, TYPE, useToast } from "vue-toastification";
 var toast = useToast();
 export class GlobalInfo {
     static UserInfo = reactive({
@@ -43,14 +43,16 @@ export class GlobalInfo {
             toast(err.msg, {
                 position: POSITION.BOTTOM_CENTER,
                 closeOnClick: true,
-                timeout: false
+                timeout: false,
+                type:TYPE.ERROR
             });
         }
         else {
             toast(JSON.stringify(err), {
                 position: POSITION.BOTTOM_CENTER,
                 closeOnClick: true,
-                timeout: false
+                timeout: false,
+                type:TYPE.ERROR
             });
         }
     }
