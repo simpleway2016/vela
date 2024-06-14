@@ -302,7 +302,7 @@ namespace VelaLib
             if (p.ExitCode != 0)
             {
               
-                throw new Exception(ret);
+                throw new Exception($"{cmd} 出错：\r\n{ret}");
             }
             return ret;
         }
