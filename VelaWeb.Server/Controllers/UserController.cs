@@ -111,7 +111,9 @@ namespace VelaWeb.Server.Controllers
                 throw new ServiceException("旧密码错误");
 
             user.Password = Way.Lib.AES.Encrypt(password, Global.SecretKey);
+            user.Flag++;
             await _db.UpdateAsync(user);
+            _memoryCache.Set($"{user.id}_flag", user.Flag);
         }
 
         [Authorize(Roles = "Admin")]

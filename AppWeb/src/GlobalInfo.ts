@@ -37,9 +37,10 @@ export class GlobalInfo {
         console.error("showError", err);
         if (err && err.statusCode == 401) {
             GlobalInfo.UserInfo.Token = "";
+            location.href = "/#/login";
             return;
         }
-        if (err.errCode) {
+        if (err.msg) {
             toast(err.msg, {
                 position: POSITION.BOTTOM_CENTER,
                 closeOnClick: true,
@@ -154,7 +155,7 @@ export class GlobalInfo {
         var text = await ret.text();
         if (ret.status >= 300 || ret.status < 200) {
             if (text)
-                throw text;
+                throw { statusCode: ret.status , msg:text };
             else
                 throw { statusCode: ret.status };
         }
@@ -207,7 +208,7 @@ export class GlobalInfo {
         if (ret.status >= 300 || ret.status < 200) {
             var text = await ret.text();
             if (text)
-                throw text;
+                throw { statusCode: ret.status , msg:text };
             else
                 throw { statusCode: ret.status };
         }
@@ -232,7 +233,7 @@ export class GlobalInfo {
         var text = await ret.text();
         if (ret.status >= 300 || ret.status < 200) {
             if (text)
-                throw text;
+                throw { statusCode: ret.status , msg:text };
             else
                 throw { statusCode: ret.status };
         }
@@ -255,7 +256,7 @@ export class GlobalInfo {
         var text = await ret.text();
         if (ret.status >= 300 || ret.status < 200) {
             if (text)
-                throw text;
+                throw { statusCode: ret.status , msg:text };
             else
                 throw { statusCode: ret.status };
         }
@@ -311,7 +312,7 @@ export class GlobalInfo {
         var text = await ret.text();
         if (ret.status >= 300 || ret.status < 200) {
             if (text)
-                throw text;
+                throw { statusCode: ret.status , msg:text };
             else
                 throw { statusCode: ret.status };
         }
@@ -367,7 +368,7 @@ export class GlobalInfo {
         if (ret.status >= 300 || ret.status < 200) {
             var text = await ret.text();
             if (text)
-                throw text;
+                throw { statusCode: ret.status , msg:text };
             else
                 throw { statusCode: ret.status };
         }
