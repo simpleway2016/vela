@@ -114,7 +114,7 @@ namespace VelaWeb.Server.Controllers
                 return new ContentResult { StatusCode=401 , Content = "token无效"};
             }
 
-            PermissionFilter.DontCheckFlagTime = DateTime.Now.AddSeconds(5);
+            PermissionFilter.DontCheckFlagTimeDict[userinfo.id.Value] = DateTime.Now.AddSeconds(5);
             userinfo.Flag++;
             await _db.UpdateAsync(userinfo);
 

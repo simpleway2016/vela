@@ -6,6 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Security.Claims;
 using VelaWeb.Server.DBModels;
@@ -16,7 +17,7 @@ namespace VelaWeb.Server
     public class PermissionFilter : IActionFilter
     {
         private readonly IMemoryCache _memoryCache;
-        public static DateTime? DontCheckFlagTime = null;
+        public static ConcurrentDictionary<long,DateTime> DontCheckFlagTimeDict = new ConcurrentDictionary<long, DateTime>();
         public PermissionFilter(IMemoryCache memoryCache)
         {
             _memoryCache = memoryCache;
@@ -36,12 +37,12 @@ namespace VelaWeb.Server
             if (arr == null)
                 return;
 
-            if (DontCheckFlagTime == null || DateTime.Now > DontCheckFlagTime)
+
+            var userid = long.Parse(arr[0]);
+            var flag = int.Parse(arr[1]);
+
+            if (DontCheckFlagTimeDict.ContainsKey(userid) == false || DateTime.Now > DontCheckFlagTimeDict[userid])
             {
-                var userid = long.Parse(arr[0]);
-                var flag = int.Parse(arr[1]);
-
-
                 if (_memoryCache.TryGetValue($"{userid}_flag", out int o))
                 {
                     if (flag != o)
