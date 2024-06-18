@@ -243,6 +243,15 @@ export class GlobalInfo {
 
     };
 
+    static postForm = async (url: string, jsonObj : any): Promise<string> => {
+        var body = new FormData();
+        for(var p in jsonObj){
+            body.append(p , jsonObj[p]);
+        }
+        var ret = await GlobalInfo.postFormData(url , body);
+        return ret;
+    };
+
     static postFormData = async (url: string, formdata: FormData): Promise<string> => {
 
 

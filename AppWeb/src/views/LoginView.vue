@@ -31,10 +31,16 @@ onMounted(async () => {
     }
 });
 
-const fillValues = () => {
+const fillValues = async () => {
     if (localStorage.getItem("UserName")) {
         data.Name = <any>localStorage.getItem("UserName");
-        data.Password = <any>localStorage.getItem("Pwd");
+
+        try {
+            data.Password = await GlobalInfo.postForm("/User/Decrypt", { content: localStorage.getItem("Pwd") });
+        } catch (error) {
+
+        }
+
         rememberMe.value = true;
     }
 }
@@ -57,8 +63,13 @@ const okClick = async () => {
 
         localStorage.setItem("Token", token);
         if (rememberMe) {
-            localStorage.setItem("UserName", data.Name);
-            localStorage.setItem("Pwd", data.Password);
+            try {
+                var pwd = await GlobalInfo.postForm("/User/Encrypt", { content: data.Password });
+                localStorage.setItem("UserName", data.Name);
+                localStorage.setItem("Pwd", pwd);
+            } catch (error) {
+
+            }
         }
         data.Password = "";
 

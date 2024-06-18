@@ -42,6 +42,30 @@ namespace VelaWeb.Server.Controllers
 
         [AllowAnonymous]
         [HttpPost]
+        public string Decrypt([FromForm] string content)
+        {
+            var key = Global.ClientCertHash;
+            if (key.Length > 32)
+                key = key.Substring(0, 32);
+            else if (key.Length < 32)
+                key = key.PadRight(32, '0');
+            return Way.Lib.AES.Decrypt(content, key);
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public string Encrypt([FromForm] string content)
+        {
+            var key = Global.ClientCertHash;
+            if (key.Length > 32)
+                key = key.Substring(0,32);
+            else if (key.Length < 32)
+                key = key.PadRight(32, '0');
+            return Way.Lib.AES.Encrypt(content, key);
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
         public async Task<string> Login([FromBody] LoginRequestModel request)
         {
             var key = request.Name.Trim().ToLower();
