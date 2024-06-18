@@ -6,6 +6,7 @@ using VelaWeb.Server.Models;
 using System.Collections.Concurrent;
 using System.Net.Http;
 using Way.Lib;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace VelaWeb.Server.Controllers
 {
@@ -14,11 +15,12 @@ namespace VelaWeb.Server.Controllers
     public class WebSocketController : ControllerBase
     {
         private readonly WebSocketConnectionCenter _webSocketConnectionCenter;
+        private readonly ProjectCenter _projectCenter;
 
-        public WebSocketController(WebSocketConnectionCenter webSocketConnectionCenter)
+        public WebSocketController(WebSocketConnectionCenter webSocketConnectionCenter , ProjectCenter projectCenter)
         {
             _webSocketConnectionCenter = webSocketConnectionCenter;
-           
+            _projectCenter = projectCenter;
         }
 
         
@@ -29,6 +31,25 @@ namespace VelaWeb.Server.Controllers
             if(Request.HttpContext.WebSockets.IsWebSocketRequest)
             {
                 using var websocket = await Request.HttpContext.WebSockets.AcceptWebSocketAsync();
+
+                var allProjects = _projectCenter.GetAllProjects();
+                foreach (var projectModel in allProjects) {
+                    try
+                    {
+                        using var cancellationTokenSource = new CancellationTokenSource(2000);
+                        await websocket.SendString(new
+                        {
+                            Guid = projectModel.Guid,
+                            Status = projectModel.Status,
+                            Error = projectModel.Error
+                        }.ToJsonString(), cancellationTokenSource.Token);
+                    }
+                    catch
+                    {
+                    }
+                   
+                }
+
                 _webSocketConnectionCenter.AddConnection(websocket);
                 try
                 {
