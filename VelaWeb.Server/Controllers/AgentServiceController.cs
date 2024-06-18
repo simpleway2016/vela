@@ -24,6 +24,7 @@ using System.Data;
 using Org.BouncyCastle.Asn1.Ocsp;
 using System.Diagnostics;
 using VelaWeb.Server.Git;
+using JMS.Common;
 
 namespace VelaWeb.Server.Controllers
 {
@@ -35,6 +36,7 @@ namespace VelaWeb.Server.Controllers
         private readonly SysDBContext _db;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly AgentsManager _agentsManager;
+        private readonly BlackList _blackList;
         private readonly WebSocketConnectionCenter _webSocketConnectionCenter;
         private readonly GitManager _gitManager;
         private readonly IProjectBuildInfoOutput _projectBuildInfoOutput;
@@ -45,7 +47,8 @@ namespace VelaWeb.Server.Controllers
         static ConcurrentDictionary<string, bool> _publishingDict = new ConcurrentDictionary<string, bool>();
 
         public AgentServiceController(SysDBContext db, IHttpClientFactory httpClientFactory,
-            AgentsManager agentsManager, 
+            AgentsManager agentsManager,
+            BlackList blackList,
             WebSocketConnectionCenter webSocketConnectionCenter,
             GitManager gitManager, IProjectBuildInfoOutput projectBuildInfoOutput,
             BuildingManager buildingManager,
@@ -54,6 +57,7 @@ namespace VelaWeb.Server.Controllers
             _db = db;
             _httpClientFactory = httpClientFactory;
             _agentsManager = agentsManager;
+            _blackList = blackList;
             _webSocketConnectionCenter = webSocketConnectionCenter;
             _gitManager = gitManager;
             _projectBuildInfoOutput = projectBuildInfoOutput;
@@ -388,9 +392,9 @@ namespace VelaWeb.Server.Controllers
             while (true)
             {
                 //检查名称重复
-               if(existProjects.Any(m=>string.Equals(m.Name?.Trim(), project.Name?.Trim() , StringComparison.OrdinalIgnoreCase)))
+                if (existProjects.Any(m => string.Equals(m.Name?.Trim(), project.Name?.Trim(), StringComparison.OrdinalIgnoreCase)))
                 {
-                    if(project.Name == null)
+                    if (project.Name == null)
                     {
                         project.Name = "Copy";
                     }
@@ -550,36 +554,33 @@ namespace VelaWeb.Server.Controllers
         [HttpGet]
         public async Task SetTermResize(string guid, int cols, int rows)
         {
-            
+
         }
 
         async Task login(string username, string pwd)
         {
+            var key = username.Trim().ToLower();
+            if (!_blackList.CheckBlackList(key))
+            {
+                throw new ServiceException("账号已被锁定");
+            }
             pwd = Way.Lib.AES.Encrypt(pwd, Global.SecretKey);
             var userinfo = await _db.UserInfo.FirstOrDefaultAsync(m => m.Name == username);
             if (userinfo == null)
                 throw new ServiceException("用户名、密码错误");
 
-            if (userinfo.IsLock)
-                throw new ServiceException("账号已被锁定");
 
             if (userinfo.Password != pwd)
             {
-                userinfo.ErrorCount++;
-                if (userinfo.ErrorCount >= 10)
-                {
-                    userinfo.IsLock = true;
-                }
-                await _db.UpdateAsync(userinfo);
+                _blackList.MarkError(key);
                 throw new ServiceException("用户名、密码错误");
             }
 
-            userinfo.ErrorCount = 0;
-            await _db.UpdateAsync(userinfo);
+            _blackList.ClearError(key);
 
-            var claimsIdentity = new ClaimsIdentity(new Claim[]
+              var claimsIdentity = new ClaimsIdentity(new Claim[]
         {
-                new Claim(ClaimTypes.NameIdentifier, userinfo.id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, $"{userinfo.id},{userinfo.Flag}"),
                 new Claim(ClaimTypes.Role , userinfo.Role.ToString()),
         }, "JMS.Token"); ;
 
@@ -918,7 +919,7 @@ namespace VelaWeb.Server.Controllers
                 UserId = this.UserId,
                 Operation = "从备份恢复",
                 Time = DateTime.UtcNow,
-                Detail = project.Name + "\r\n" + Path.GetFileName( backupFileName)
+                Detail = project.Name + "\r\n" + Path.GetFileName(backupFileName)
             });
 
             await project.Restore(backupFileName);
@@ -930,7 +931,7 @@ namespace VelaWeb.Server.Controllers
             var items = _projectCenter.GetAllProjects().Where(m => guids.Contains(m.Guid)).ToArray();
             Dictionary<string, string> dockerFiles = new Dictionary<string, string>();
             Dictionary<string, Dictionary<string, string>> configFiles = new Dictionary<string, Dictionary<string, string>>();
-            foreach ( var project in items)
+            foreach (var project in items)
             {
                 try
                 {
@@ -941,25 +942,26 @@ namespace VelaWeb.Server.Controllers
                         dockerFiles[project.Guid] = dockerFile;
                     }
                 }
-                catch 
+                catch
                 {
- 
+
                 }
 
                 //输出配置文件
                 var filePaths = project.ConfigFiles?.Split(',').Select(m => m.Trim()).Where(m => m.Length > 0).ToArray();
-                if(filePaths != null && filePaths.Length > 0)
+                if (filePaths != null && filePaths.Length > 0)
                 {
                     var fileDict = new Dictionary<string, string>();
                     configFiles[project.Guid] = fileDict;
-                    foreach (var filePath in filePaths) {
+                    foreach (var filePath in filePaths)
+                    {
                         try
                         {
                             var content = await GetConfigContent(project.Guid, filePath);
-                            if(!string.IsNullOrWhiteSpace(content))
+                            if (!string.IsNullOrWhiteSpace(content))
                             {
                                 fileDict[filePath] = content;
-                            }                           
+                            }
                         }
                         catch
                         {

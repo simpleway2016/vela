@@ -12,7 +12,7 @@ namespace VelaWeb.Server.Controllers
             {
                 if (_UserId == null)
                 {
-                    _UserId = long.Parse(this.User.FindFirstValue(ClaimTypes.NameIdentifier));
+                    _UserId = long.Parse(this.User.FindFirstValue(ClaimTypes.NameIdentifier).Split(',')[0]);
                 }
                 return _UserId.GetValueOrDefault();
             }

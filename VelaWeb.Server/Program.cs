@@ -128,6 +128,9 @@ namespace VelaWeb
                 }
             }
 
+            //Ìí¼Ó»º´æ
+            services.AddMemoryCache();
+
             //×¢²á´úÂë½âÎöÆ÷
             services.RegisterCodeParser<CSharpCodeParser>();
             services.RegisterCodeParser<JsonCodeParser>();
@@ -144,9 +147,11 @@ namespace VelaWeb
             services.AddSingleton<DeleteLogs>();
             services.AddSingleton<BuildingManager>();
             services.AddTransient<JMS.JmsUploadClient>();
+            services.AddSingleton<JMS.Common.BlackList>();
 
             services.AddMvc(option =>
             {
+                option.Filters.Add<PermissionFilter>();
                 option.Filters.Add<OutputResultFilter>();
             });
             services.AddControllers().AddJsonOptions(c =>

@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	  <NoWarn>$(NoWarn);NU1605</NoWarn>
 	  <ServerGarbageCollection>false</ServerGarbageCollection>
-	  <Version>2.7.5</Version>
+	  <Version>2.7.6</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,11 +14,12 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="JMS.FileUploader.AspNetCore" Version="2.1.3" />
-		<PackageReference Include="JMS.Token.AspNetCore" Version="2.2.6" />
+		<PackageReference Include="JMS.Common" Version="3.6.1" />
+		<PackageReference Include="JMS.FileUploader.AspNetCore" Version="2.2.1" />
+		<PackageReference Include="JMS.Token.AspNetCore" Version="2.7.1" />
 		<PackageReference Include="JMS.UploadClient" Version="1.0.0" />
-		<PackageReference Include="Way.EntityDB" Version="6.1.9" />
-		<PackageReference Include="Way.Lib" Version="2.0.10.20" />
+		<PackageReference Include="Way.EntityDB" Version="7.1.6" />
+		<PackageReference Include="Way.Lib" Version="2.2.0" />
 	</ItemGroup>
 
 	<ItemGroup>

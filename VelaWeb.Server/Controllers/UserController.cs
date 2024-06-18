@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.Xml.Linq;
 using EJ;
+using JMS.Common;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace VelaWeb.Server.Controllers
 {
@@ -20,13 +22,20 @@ namespace VelaWeb.Server.Controllers
     {
         private readonly SysDBContext _db;
         private readonly TokenClient _tokenClient;
+        private readonly BlackList _blackList;
+        private readonly IMemoryCache _memoryCache;
         private readonly ProjectCenter _projectCenter;
         private readonly AgentsManager _agentsManager;
 
-        public UserController(SysDBContext db, TokenClient tokenClient, ProjectCenter projectCenter,AgentsManager agentsManager)
+        public UserController(SysDBContext db, TokenClient tokenClient,
+            BlackList blackList,
+            IMemoryCache memoryCache,
+            ProjectCenter projectCenter,AgentsManager agentsManager)
         {
             _db = db;
             _tokenClient = tokenClient;
+            _blackList = blackList;
+            _memoryCache = memoryCache;
             _projectCenter = projectCenter;
             _agentsManager = agentsManager;
         }
@@ -35,32 +44,33 @@ namespace VelaWeb.Server.Controllers
         [HttpPost]
         public async Task<string> Login([FromBody] LoginRequestModel request)
         {
+            var key = request.Name.Trim().ToLower();
+            if (!_blackList.CheckBlackList(key))
+            {
+                throw new ServiceException("账号已被锁定");
+            }
+
             var pwd = Way.Lib.AES.Encrypt(request.Password, Global.SecretKey);
             var userinfo = await _db.UserInfo.FirstOrDefaultAsync(m => m.Name == request.Name);
             if (userinfo == null)
                 throw new ServiceException("用户名、密码错误");
 
-            if (userinfo.IsLock)
-                throw new ServiceException("账号已被锁定");
-
+        
             if (userinfo.Password != pwd)
             {
-                userinfo.ErrorCount++;
-                if(userinfo.ErrorCount >= 10)
-                {
-                    userinfo.IsLock = true;
-                }
-                await _db.UpdateAsync(userinfo);
+                _blackList.MarkError(key);
                 throw new ServiceException("用户名、密码错误");
             }
 
-            userinfo.ErrorCount = 0;
+            _blackList.ClearError(key);
+            userinfo.Flag++;
             await _db.UpdateAsync(userinfo);
 
+            _memoryCache.Set($"{userinfo.id}_flag", userinfo.Flag);
 #if DEBUG
-            return _tokenClient.Build(userinfo.id.ToString(), userinfo.Role.ToString(), DateTime.Now.AddMinutes(10000));
+            return _tokenClient.Build($"{userinfo.id},{userinfo.Flag}", userinfo.Role.ToString() , DateTime.Now.AddMinutes(10000));
 #else
-            return _tokenClient.Build(userinfo.id.ToString() ,userinfo.Role.ToString(), DateTime.Now.AddMinutes(10));
+            return _tokenClient.Build($"{userinfo.id},{userinfo.Flag}" ,userinfo.Role.ToString(), DateTime.Now.AddMinutes(10));
 #endif
         }
 
@@ -68,12 +78,12 @@ namespace VelaWeb.Server.Controllers
         public string RefreshToken()
         {
             var obj = _tokenClient.Verify(Request.Headers.Authorization.ToString());
-            var userid = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var data = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
             var role = this.User.FindFirstValue(ClaimTypes.Role);
 #if DEBUG
-            return _tokenClient.Build(userid, role, DateTime.Now.AddMinutes(10000));
+            return _tokenClient.Build(data, role, DateTime.Now.AddMinutes(10000));
 #else
-            return _tokenClient.Build(userid, role,  DateTime.Now.AddMinutes(10));
+            return _tokenClient.Build(data, role,  DateTime.Now.AddMinutes(10));
 #endif
         }
 
@@ -156,9 +166,9 @@ namespace VelaWeb.Server.Controllers
             if(!string.IsNullOrEmpty(requestModel.Password))
             {
                 user.Password = Way.Lib.AES.Encrypt( requestModel.Password , Global.SecretKey);
+                user.Flag++;
             }
             user.Role = requestModel.Role;
-            user.IsLock = false;
 
             await _db.InsertAsync(new Logs
             {
