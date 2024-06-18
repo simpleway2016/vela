@@ -580,7 +580,7 @@ namespace VelaWeb.Server.Controllers
 
               var claimsIdentity = new ClaimsIdentity(new Claim[]
         {
-                new Claim(ClaimTypes.NameIdentifier, $"{userinfo.id},{userinfo.Flag}"),
+                new Claim("Content", $"{userinfo.id},{userinfo.Flag}"),
                 new Claim(ClaimTypes.Role , userinfo.Role.ToString()),
         }, "JMS.Token"); ;
 

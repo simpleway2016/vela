@@ -32,7 +32,10 @@ namespace VelaWeb.Server
             if (context.HttpContext.User == null)
                 return;
 
-            var arr = context.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier).Split(',');
+            var arr = context.HttpContext.User.FindFirstValue("Content")?.Split(',');
+            if (arr == null)
+                return;
+
             var userid = long.Parse(arr[0]);
             var flag = int.Parse(arr[1]);
 

@@ -78,7 +78,7 @@ namespace VelaWeb.Server.Controllers
         public string RefreshToken()
         {
             var obj = _tokenClient.Verify(Request.Headers.Authorization.ToString());
-            var data = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var data = this.User.FindFirstValue("Content");
             var role = this.User.FindFirstValue(ClaimTypes.Role);
 #if DEBUG
             return _tokenClient.Build(data, role, DateTime.Now.AddMinutes(10000));
@@ -90,7 +90,7 @@ namespace VelaWeb.Server.Controllers
         [HttpGet]
         public async Task<DBModels.UserInfo> GetUserInfo()
         {
-            var userid = long.Parse(this.User.FindFirstValue("Content"));
+            var userid = long.Parse(this.User.FindFirstValue("Content").Split(',')[0]);
             var ret = await _db.UserInfo.FirstOrDefaultAsync(m => m.id == userid);
             ret.Password = typeof(UserController).Assembly.GetName().Version.ToString();
             ret.ChangedProperties.Clear();
