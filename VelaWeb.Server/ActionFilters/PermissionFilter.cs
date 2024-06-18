@@ -16,7 +16,7 @@ namespace VelaWeb.Server
     public class PermissionFilter : IActionFilter
     {
         private readonly IMemoryCache _memoryCache;
-
+        public static DateTime? DontCheckFlagTime = null;
         public PermissionFilter(IMemoryCache memoryCache)
         {
             _memoryCache = memoryCache;
@@ -36,20 +36,23 @@ namespace VelaWeb.Server
             if (arr == null)
                 return;
 
-            var userid = long.Parse(arr[0]);
-            var flag = int.Parse(arr[1]);
-
-
-            if( _memoryCache.TryGetValue($"{userid}_flag" , out int o))
+            if (DontCheckFlagTime == null || DateTime.Now > DontCheckFlagTime)
             {
-                if(flag != o)
+                var userid = long.Parse(arr[0]);
+                var flag = int.Parse(arr[1]);
+
+
+                if (_memoryCache.TryGetValue($"{userid}_flag", out int o))
                 {
-                    context.Result = new ContentResult()
+                    if (flag != o)
                     {
-                        StatusCode = 401,
-                        Content = "The user has already logged in on another device"
-                    };
-                    return;
+                        context.Result = new ContentResult()
+                        {
+                            StatusCode = 401,
+                            Content = "The user has already logged in on another device"
+                        };
+                        return;
+                    }
                 }
             }
         }

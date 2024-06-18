@@ -99,16 +99,35 @@ namespace VelaWeb.Server.Controllers
         }
 
         [HttpGet]
-        public string RefreshToken()
+        public async Task<ContentResult> RefreshToken()
         {
             var obj = _tokenClient.Verify(Request.Headers.Authorization.ToString());
             var data = this.User.FindFirstValue("Content");
             var role = this.User.FindFirstValue(ClaimTypes.Role);
+            var arr = data.Split(',');
+            var userid = long.Parse(arr[0]);
+            var flag = int.Parse(arr[1]);
+
+            var userinfo = await _db.UserInfo.FirstOrDefaultAsync(m=>m.id == userid);
+            if(userinfo.Flag != flag)
+            {
+                return new ContentResult { StatusCode=401 , Content = "token无效"};
+            }
+
+            PermissionFilter.DontCheckFlagTime = DateTime.Now.AddSeconds(5);
+            userinfo.Flag++;
+            await _db.UpdateAsync(userinfo);
+
+            _memoryCache.Set($"{userinfo.id}_flag", userinfo.Flag);
+            data = $"{userid},{userinfo.Flag}";
+
+            
 #if DEBUG
-            return _tokenClient.Build(data, role, DateTime.Now.AddMinutes(10000));
+            data = _tokenClient.Build(data, role, DateTime.Now.AddMinutes(10000));
 #else
-            return _tokenClient.Build(data, role,  DateTime.Now.AddMinutes(10));
+            data = _tokenClient.Build(data, role,  DateTime.Now.AddMinutes(10));
 #endif
+            return new ContentResult { StatusCode = 200, Content = data };
         }
 
         [HttpGet]
