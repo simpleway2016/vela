@@ -76,9 +76,9 @@ const refreshDatas = async () => {
     datas.value.splice(0, datas.value.length);
     isBusy.value = true;
     try {
-        if(languages.value.length == 0){
-            var ret = JSON.parse( await GlobalInfo.get("/CodeBuilder/GetSupportLanguages",null)).map((m:any)=>{
-                return {name:m};
+        if (languages.value.length == 0) {
+            var ret = JSON.parse(await GlobalInfo.get("/CodeBuilder/GetSupportLanguages", null)).map((m: any) => {
+                return { name: m };
             });
             console.log(ret);
             languages.value.push(...ret);
@@ -258,12 +258,13 @@ const parseClick = async () => {
     }
 }
 
-const exportAllClick = async ()=>{
+const exportAllClick = async () => {
     isBusy.value = true;
     try {
-        var content = await GlobalInfo.get("/CodeBuilder/GetAllItems", null);
-        
-        const blob = new Blob([content], { type: 'text/plain' });
+        var items = JSON.parse(await GlobalInfo.get("/CodeBuilder/GetAllItems", null));
+        var vueMethods = await GlobalInfo.get("/CodeBuilder/GetVueMethod", null);
+
+        const blob = new Blob([JSON.stringify({ items, vueMethods })], { type: 'text/plain' });
 
         // 创建一个链接元素用于下载
         const a = document.createElement('a');
@@ -296,17 +297,16 @@ const onSelectedFile = async () => {
             try {
                 const obj = JSON.parse(e.target.result);
 
-                if (!obj.length) {
-                    GlobalInfo.showError("文件里没有任何脚本");
-                    return;
-                }
+                isBusy.value = true;
+                await GlobalInfo.postJson("/CodeBuilder/ImportItems?parentId=" + (parentId ? parentId : ""), obj.items);
 
-                 isBusy.value = true;
-                 await GlobalInfo.postJson("/CodeBuilder/ImportItems?parentId=" + (parentId?parentId:""), obj);
-                 GlobalInfo.toast("成功导入");
-                 isBusy.value = false;
-                 
-                 refreshDatas();
+                if( window.confirm("是否要覆盖Vue方法体") ){
+                    await GlobalInfo.postForm("/CodeBuilder/SaveVueMethod", { code: obj.vueMethods });
+                }
+                GlobalInfo.toast("成功导入");
+                isBusy.value = false;
+
+                refreshDatas();
             } catch (error) {
                 isBusy.value = false;
                 GlobalInfo.showError(error);
@@ -328,7 +328,7 @@ const onSelectedFile = async () => {
     <div ref="pageContentEle" class="pageContent">
 
         <template v-if="currentItemId">
-            <component :is="childView" v-model="currentItemId" :language="currentLanguage"/>
+            <component :is="childView" v-model="currentItemId" :language="currentLanguage" />
         </template>
 
         <Loading v-if="isBusy" class="loadingV3" />
@@ -349,12 +349,12 @@ const onSelectedFile = async () => {
                     <button class="btn btn-light" @click="addClick">新增项</button>
                     <button class="btn btn-light" @click="vueMethodClick">Vue方法体</button>
                     <button class="btn btn-light" @click="parseClick" v-if="copyId">粘贴</button>
-                    <button class="btn btn-light" @click="exportAllClick" v-if="parentId==null">全部导出</button>
+                    <button class="btn btn-light" @click="exportAllClick" v-if="parentId == null">全部导出</button>
                     <span class="btn btn-light" style="position: relative;"><i class="fa fa-share-square-o"></i>
-                            导入
-                            <input type="file" accept=".json" @change="onSelectedFile" ref="fileEle"
-                                style="position: absolute;left:0;top:0;right:0;bottom: 0;opacity: 0;">
-                        </span>
+                        导入
+                        <input type="file" accept=".json" @change="onSelectedFile" ref="fileEle"
+                            style="position: absolute;left:0;top:0;right:0;bottom: 0;opacity: 0;">
+                    </span>
                     <a @click="refreshDatas" class="btn btn-light" title="刷新列表"><i class="fa fa-refresh"></i></a>
                 </div>
             </div>
@@ -386,16 +386,19 @@ const onSelectedFile = async () => {
                                             <ul class="dropdown-menu dropdown-menu-list">
                                                 <li> <a @click="editClick(item)"><i class="fa falist fa-edit"></i>编辑</a>
                                                 </li>
-                                                <li> <a @click="copyId = item.id"><i class="fa falist fa-copy"></i>复制</a>
+                                                <li> <a @click="copyId = item.id"><i
+                                                            class="fa falist fa-copy"></i>复制</a>
                                                 </li>
-                                                <li> <a @click="deleteClick(item)"><i class="fa falist fa-trash"></i>删除</a>
+                                                <li> <a @click="deleteClick(item)"><i
+                                                            class="fa falist fa-trash"></i>删除</a>
                                                 </li>
                                             </ul>
                                         </li>
                                     </td>
                                     <td class="td" :class="{ noborder: index === 0 }" @click="itemClick(item)">
                                         <i class="fa fa-folder folder" v-if="item.Type == 1"></i>
-                                        <i class="fa fa-file-code-o" v-if="item.Type == 2"></i> {{ item.FullName ?? item.Name
+                                        <i class="fa fa-file-code-o" v-if="item.Type == 2"></i> {{ item.FullName ??
+                                            item.Name
                                         }}
                                     </td>
                                 </tr>
@@ -471,7 +474,8 @@ const onSelectedFile = async () => {
                                 <button type="button" class="btn btn-default"
                                     @click="okClick">保&nbsp;&nbsp;&nbsp;&nbsp;存</button>
                                 &nbsp;&nbsp;&nbsp;&nbsp;
-                                <button type="button" class="btn" @click="cancelClick">取&nbsp;&nbsp;&nbsp;&nbsp;消</button>
+                                <button type="button" class="btn"
+                                    @click="cancelClick">取&nbsp;&nbsp;&nbsp;&nbsp;消</button>
                             </div>
 
                         </form>
