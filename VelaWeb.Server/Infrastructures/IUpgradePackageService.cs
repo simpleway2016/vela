@@ -57,10 +57,10 @@ namespace VelaWeb.Server.Infrastructures
         {
             System.IO.File.Move(filepath, "./Upgrade.zip", true);
 
-            var model = new VelaService.ServiceUpgradeConfigModel()
+            var model = new ServiceUpgradeConfigModel()
             {
                 Zip = "Upgrade.zip",
-                ExcludeFiles = new string[] { "appsettings.json", "VelaWeb.Server", "createdump", "VelaService" }
+                ExcludeFiles = new string[] { "appsettings.json" }
             };
             System.IO.File.WriteAllText("./VelaService.upgrade.json", model.ToJsonString(), Encoding.UTF8);
 

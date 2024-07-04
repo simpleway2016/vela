@@ -38,9 +38,9 @@ namespace VelaAgent.Controllers
             _logger.LogInformation("收到更新包");
             System.IO.File.Move(filepath, "./Upgrade.zip", true);
 
-            var model = new VelaService.ServiceUpgradeConfigModel() { 
+            var model = new ServiceUpgradeConfigModel() { 
                 Zip = "Upgrade.zip",
-                ExcludeFiles = new string[] { "appsettings.json", "VelaAgent", "createdump", "VelaService" }
+                ExcludeFiles = new string[] { "appsettings.json" }
             };
             System.IO.File.WriteAllText("./VelaService.upgrade.json", model.ToJsonString(), Encoding.UTF8);
             
@@ -51,5 +51,12 @@ namespace VelaAgent.Controllers
             });
         }
     }
-
+    public class ServiceUpgradeConfigModel
+    {
+        public string Zip { get; set; }
+        /// <summary>
+        /// 排除的文件
+        /// </summary>
+        public string[] ExcludeFiles { get; set; }
+    }
 }

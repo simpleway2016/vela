@@ -7,7 +7,7 @@
 	  <ServerGarbageCollection>false</ServerGarbageCollection>
     <UserSecretsId>0d102c31-dff7-457b-9a64-3e1ff3afd75d</UserSecretsId>
 	  <NoWarn>$(NoWarn);NU1605</NoWarn>
-	  <Version>2.3.16</Version>
+	  <Version>2.3.17</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,6 +32,9 @@
 		<None Update="libtty.so">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="VelaService">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 	<ItemGroup Condition=" '$(RuntimeIdentifier)' == 'osx-x64' ">
 		<None Update="libtty.a">
@@ -41,7 +44,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\VelaLib\VelaLib.csproj" />
-    <ProjectReference Include="..\VelaService\VelaService.csproj" />
   </ItemGroup>
 
 	

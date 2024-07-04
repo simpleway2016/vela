@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	  <NoWarn>$(NoWarn);NU1605</NoWarn>
 	  <ServerGarbageCollection>false</ServerGarbageCollection>
-	  <Version>2.8.5</Version>
+	  <Version>2.8.6</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,7 +25,6 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Vela.CodeParser.CSharp\Vela.CodeParser.CSharp.csproj" />
 	  <ProjectReference Include="..\VelaLib\VelaLib.csproj" />
-	  <ProjectReference Include="..\VelaService\VelaService.csproj" />
 	</ItemGroup>
 
 
@@ -36,6 +35,9 @@
 
 	<ItemGroup Condition=" '$(RuntimeIdentifier)' == 'linux-x64' ">
 		<None Update="libtty.so">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="VelaService">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
