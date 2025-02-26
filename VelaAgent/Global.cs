@@ -55,6 +55,10 @@ namespace VelaAgent
     public class AppConfig
     {
         public string PublishRootPath { get; set; }
+        /// <summary>
+        /// 备份保留天数
+        /// </summary>
+        public int BackupKeepDays { get; set; } = 5;
         public string BackupPath { get; set; } = "./ProjectBackups";
         public string FileListFolder { get; set; } = "FileList";
     }

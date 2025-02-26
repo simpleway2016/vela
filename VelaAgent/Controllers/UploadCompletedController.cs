@@ -115,8 +115,11 @@ namespace VelaAgent.Controllers
 
                     System.IO.File.WriteAllText(velaFileListPath, fileListContent, Encoding.UTF8);
 
-                    await this.Output("正在创建备份...");
-                    await _projectBackup.Create(db, keepAliveObj.Project , velaFileListPath, newFileList);
+                    if (keepAliveObj.Project.BackupCount != 0)
+                    {
+                        await this.Output("正在创建备份...");
+                        await _projectBackup.Create(db, keepAliveObj.Project, velaFileListPath, newFileList);
+                    }
 
                     string ret = "0";
                     if (!string.IsNullOrEmpty(keepAliveObj.Project.RunCmd) || keepAliveObj.Project.RunType != Project_RunTypeEnum.Program)

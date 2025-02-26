@@ -7,7 +7,7 @@
 	  <ServerGarbageCollection>false</ServerGarbageCollection>
     <UserSecretsId>0d102c31-dff7-457b-9a64-3e1ff3afd75d</UserSecretsId>
 	  <NoWarn>$(NoWarn);NU1605</NoWarn>
-	  <Version>2.3.17</Version>
+	  <Version>2.3.19</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,7 +25,7 @@
     <PackageReference Include="Docker.DotNet" Version="3.125.15" />
     <PackageReference Include="JMS.Common" Version="3.3.3" />
     <PackageReference Include="System.Management" Version="7.0.2" />
-    <PackageReference Include="Way.EntityDB" Version="6.1.9" />
+    <PackageReference Include="Way.EntityDB" Version="7.3.1" />
   </ItemGroup>
 
 	<ItemGroup Condition=" '$(RuntimeIdentifier)' == 'linux-x64' ">

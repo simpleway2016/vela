@@ -1,4 +1,5 @@
-﻿using VelaAgent.DBModels;
+﻿using System.Linq;
+using VelaAgent.DBModels;
 using VelaLib;
 
 namespace VelaAgent.AutoRun
@@ -42,21 +43,38 @@ namespace VelaAgent.AutoRun
             var backupFolder = Path.Combine(Global.AppConfig.Current.BackupPath, project.Guid);
             if (Directory.Exists(backupFolder) == false)
                 return;
-
-            var folderObjects = Directory.GetDirectories(backupFolder).Select(m=>new BackupFolder(m)).OrderByDescending(m=>m.Time).Skip(5).ToArray();
-
-            foreach ( var folderObj in folderObjects)
+            if (project.BackupCount >= 0)
             {
-                try
-                {                 
-                    if( (DateTime.UtcNow - folderObj.Time).TotalDays > 5)
+                var folderObjects = Directory.GetDirectories(backupFolder).Select(m => new BackupFolder(m)).OrderByDescending(m => m.Time).Skip(project.BackupCount.Value).ToArray();
+                foreach (var folderObj in folderObjects)
+                {
+                    try
                     {
                         SysUtility.DeleteFolder(folderObj.Dir);
                     }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "");
+                    }
                 }
-                catch (Exception ex)
+            }
+            else
+            {
+                var folderObjects = Directory.GetDirectories(backupFolder).Select(m => new BackupFolder(m)).OrderByDescending(m => m.Time).Skip(5).ToArray();
+
+                foreach (var folderObj in folderObjects)
                 {
-                    _logger.LogError(ex, "");
+                    try
+                    {
+                        if ((DateTime.UtcNow - folderObj.Time).TotalDays > Global.AppConfig.Current.BackupKeepDays)
+                        {
+                            SysUtility.DeleteFolder(folderObj.Dir);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "");
+                    }
                 }
             }
         }

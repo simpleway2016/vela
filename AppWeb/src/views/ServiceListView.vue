@@ -1147,6 +1147,15 @@ const okImportClick = async () => {
                                 </div>
 
                                 <div class="form-group">
+                                    <label class="col-sm-3 control-label form-label">自动备份程序数量</label>
+                                    <div class="col-sm-9">
+                                        <input type="number" class="form-control" v-model="editingModel.BackupCount">
+                                        <span id="helpBlock" class="help-block">留空表示默认（超过5份则只保留5天），0表示不备份</span>
+
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
                                     <label class="col-sm-3 control-label form-label">Git存储库地址</label>
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" @blur="loadBranches"

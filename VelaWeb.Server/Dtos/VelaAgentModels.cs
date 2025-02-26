@@ -554,6 +554,13 @@ namespace VelaAgent.DBModels.Dtos
                 }
             }
         }
+
+        /// <summary>备份数量，null表示不限制</summary>
+        public virtual System.Nullable<Int32> BackupCount
+        {
+            get;
+            set;
+        }
     }
     public enum Project_RunTypeEnum:int
     {
