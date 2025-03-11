@@ -62,7 +62,7 @@ svg {
 }
 
 .value {
-    font-size: 12px;
+    font-size: 9px;
     position: absolute;
     left: 0;
     top: 0;
@@ -72,6 +72,5 @@ svg {
     align-items: center;
     justify-content: center;
     font-family: 'Montserrat', sans-serif;
-    scale: 0.8;
 }
 </style>
