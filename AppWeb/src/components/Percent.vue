@@ -1,23 +1,36 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref,watch,toRef } from 'vue';
-const props = defineProps(["value","underValue"]);
+import { onMounted, onUnmounted, ref, watch, toRef } from 'vue';
+const props = defineProps(["value", "underValue"]);
 
 const toRefvalue = toRef(props, "value");
 
-onMounted(()=>{
+onMounted(() => {
     var percent = parseFloat(props.value);
-    var l = 2*Math.PI*20*percent/100.0;
+    var l = 2 * Math.PI * 20 * percent / 100.0;
     dasharray.value = `${l} 300000`;
-    console.log("onMounted" , l);
+    console.log("onMounted", l);
 });
 
 const dasharray = ref("");
-watch(toRefvalue , (newValue:any,oldValue)=>{
+watch(toRefvalue, (newValue: any, oldValue) => {
     var percent = parseFloat(newValue);
-    var l = 2*Math.PI*20*percent/100.0;
+    var l = 2 * Math.PI * 20 * percent / 100.0;
     dasharray.value = `${l} 300000`;
-    console.log("watch" , l);
+    console.log("watch", l);
 });
+
+const formatUnderValue = (percent: number, underValue: string) => {
+    if (!underValue) return '';
+    const match = underValue.match(/\d+\.?\d*/);
+    var total = match ? parseFloat(match[0]) : 0;
+    if (total == 0)
+        return 0;
+
+    if (match)
+        return parseInt(<any>(total * percent/100.0)) + underValue.replace(match[0], "");
+
+    return "";
+}
 </script>
 
 <template>
@@ -26,27 +39,29 @@ watch(toRefvalue , (newValue:any,oldValue)=>{
             <circle cx="25" cy="25" r="20" fill="none" stroke="#eee" stroke-width="6"></circle>
         </svg>
         <svg class="s2" style="position: absolute;left: 0;top: 0;">
-            <circle v-if="value>=100" cx="25" cy="25" r="20" fill="none" stroke="green" stroke-width="6"></circle>
-            <circle v-else cx="25" cy="25" r="20" fill="none" stroke="green" stroke-width="6" :stroke-dasharray="dasharray"></circle>
+            <circle v-if="value >= 100" cx="25" cy="25" r="20" fill="none" stroke="green" stroke-width="6"></circle>
+            <circle v-else cx="25" cy="25" r="20" fill="none" stroke="green" stroke-width="6"
+                :stroke-dasharray="dasharray"></circle>
         </svg>
-        <div v-if="underValue" :title="underValue" class="value" style="text-decoration: underline;">
-            {{ value < 1 ? value : parseInt(value) }}%
+        <div v-if="underValue" :title="underValue" class="value">
+            {{ formatUnderValue(value, underValue) }}
         </div>
         <div v-else class="value">
-            {{ value < 1 ? value : parseInt(value) }}%
+            {{ value < 1 ? value : parseInt(value) }}% </div>
         </div>
-    </div>
 </template>
 <style scoped>
-div,svg {
+div,
+svg {
     width: 50px;
     height: 50px;
 }
 
-.s2{
+.s2 {
     transform: rotate(-90deg);
 }
-.value{
+
+.value {
     font-size: 12px;
     position: absolute;
     left: 0;
@@ -57,5 +72,6 @@ div,svg {
     align-items: center;
     justify-content: center;
     font-family: 'Montserrat', sans-serif;
+    scale: 0.8;
 }
 </style>

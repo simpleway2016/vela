@@ -1,5 +1,5 @@
-set version=2.8.6
-set versionNew=2.8.7
+set version=2.8.7
+set versionNew=2.8.8
 del %~dp0VelaWeb.Linux.%version%.zip
 cd "..\VelaWeb.Server"
 dotnet publish -c release -o bin\Release\linuxpublish --self-contained true --runtime linux-x64
