@@ -464,11 +464,17 @@ namespace VelaAgent.Controllers
             var item = _keepProcessAliveFactory.Create(guid);
             if (item != null)
             {
+                project.IsStopped = true;
+                await _db.UpdateAsync(project);
+
                 await item.Stop();
             }
-
-            project.IsStopped = true;
-            await _db.UpdateAsync(project);
+            else
+            {
+                project.IsStopped = true;
+                await _db.UpdateAsync(project);
+            }
+            
         }
 
         [HttpGet]

@@ -67,6 +67,7 @@ namespace VelaAgent.Infrastructures.ProjectRunners
             _logger?.LogDebug($"{Project.Name}进程退出, process id:{Project.ProcessId}");
            
             using var db = new SysDBContext();
+            this.Project = db.Project.FirstOrDefault(m => m.Guid == Project.Guid);
             Project.ProcessId = null;
             db.Update(Project);
 
@@ -75,8 +76,12 @@ namespace VelaAgent.Infrastructures.ProjectRunners
                 _process?.Dispose();
                 _process = null;
 
-                Thread.Sleep(1000);
-                Start();
+                if(Project.IsStopped == false)
+                {
+                    Thread.Sleep(1000);
+                    Start();
+                }
+                
             }
             else
             {

@@ -17,7 +17,7 @@ namespace VelaAgent.KeepAlive
             var projects = db.Project.ToArray();
             foreach (var project in projects)
             {
-                if (project.IsFirstUpload == false)
+                if (project.IsFirstUpload == false && project.IsStopped == false)
                 {
                     if (!string.IsNullOrWhiteSpace(project.RunCmd) && project.ProcessId != null || project.RunType != Project_RunTypeEnum.Program)
                     {
