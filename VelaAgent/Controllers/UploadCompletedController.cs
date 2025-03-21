@@ -114,8 +114,8 @@ namespace VelaAgent.Controllers
                     }
 
                     System.IO.File.WriteAllText(velaFileListPath, fileListContent, Encoding.UTF8);
-
-                    if (keepAliveObj.Project.BackupCount != 0)
+                   
+                    if (db.Project.Where(m => m.Guid == projectGuid).Select(m => m.BackupCount).FirstOrDefault() != 0)
                     {
                         await this.Output("正在创建备份...");
                         await _projectBackup.Create(db, keepAliveObj.Project, velaFileListPath, newFileList);
