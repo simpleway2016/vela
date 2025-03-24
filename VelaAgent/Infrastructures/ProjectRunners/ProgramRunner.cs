@@ -99,7 +99,15 @@ namespace VelaAgent.Infrastructures.ProjectRunners
             FileStream fs = null;
             try
             {
-                var path = Path.Combine(Global.AppConfig.Current.PublishRootPath, this.Project.Name , this.Project.LogPath);
+                string path;
+                if (this.Project.LogPath?.StartsWith("/") == true)
+                {
+                    path = this.Project.LogPath;
+                }
+                else
+                {
+                    path = Path.Combine(Global.AppConfig.Current.PublishRootPath, this.Project.Name, this.Project.LogPath);
+                }
                 var maxSize = Project.LogMaxSize.GetValueOrDefault() * 1024 * 1024;
 
                 fs = File.Exists(path) ? new FileStream(path, FileMode.Open, FileAccess.Write, FileShare.ReadWrite) : new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
@@ -146,36 +154,45 @@ namespace VelaAgent.Infrastructures.ProjectRunners
             try
             {
                 var maxSize = Project.LogMaxSize.GetValueOrDefault() * 1024 * 1024;
-                var logpath = Path.Combine(Global.AppConfig.Current.PublishRootPath, this.Project.Name, this.Project.LogPath);
-                var path = $"{logpath}.err";
 
-                while (true)
+                string path;
+                if (this.Project.LogPath?.StartsWith("/") == true)
                 {
-                    var count = await process.StandardError.BaseStream.ReadAsync(buffer, 0, buffer.Length);
-                    if (count > 0)
-                    {
-                        if(fs == null)
-                        {                          
-                            //如果文件已存在，则不再创建，打开继续追加
-                            fs = File.Exists(path) ? new FileStream(path , FileMode.Open , FileAccess.Write , FileShare.ReadWrite) : new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
-                            //定位到文件末尾
-                            fs.Seek(0, SeekOrigin.End);
-                        }
-                        await fs.WriteAsync(buffer, 0, count);
-                        await fs.FlushAsync();
-                        if(maxSize > 0 && fs.Length > maxSize)
-                        {
-                            fs.Dispose();
-                            File.Delete(path);
-                            fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
-
-                        }
-                    }
-                    if (process.HasExited)
-                    {
-                        break;
-                    }
+                    path = $"{Project.LogPath}.err";                   
                 }
+                else
+                {
+                    var logpath = Path.Combine(Global.AppConfig.Current.PublishRootPath, this.Project.Name, this.Project.LogPath);
+                    path = $"{logpath}.err";
+                }
+
+                    while (true)
+                    {
+                        var count = await process.StandardError.BaseStream.ReadAsync(buffer, 0, buffer.Length);
+                        if (count > 0)
+                        {
+                            if (fs == null)
+                            {
+                                //如果文件已存在，则不再创建，打开继续追加
+                                fs = File.Exists(path) ? new FileStream(path, FileMode.Open, FileAccess.Write, FileShare.ReadWrite) : new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+                                //定位到文件末尾
+                                fs.Seek(0, SeekOrigin.End);
+                            }
+                            await fs.WriteAsync(buffer, 0, count);
+                            await fs.FlushAsync();
+                            if (maxSize > 0 && fs.Length > maxSize)
+                            {
+                                fs.Dispose();
+                                File.Delete(path);
+                                fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+
+                            }
+                        }
+                        if (process.HasExited)
+                        {
+                            break;
+                        }
+                    }
             }
             catch (Exception)
             {
