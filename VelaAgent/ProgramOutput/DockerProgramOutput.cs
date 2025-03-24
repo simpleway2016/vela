@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Diagnostics;
+using VelaAgent.DBModels;
 using VelaAgent.Infrastructures;
 using VelaLib;
 
@@ -29,7 +30,7 @@ namespace VelaAgent.ProgramOutput
             }
         }
 
-        public async Task StartOutput(IInfoOutput infoOutput,int preLines)
+        public async Task StartOutput(Project project, IInfoOutput infoOutput,int preLines)
         {
             _process = _cmdRunner.Run(null, $"docker logs -f {_containerId} --tail {preLines}");
 

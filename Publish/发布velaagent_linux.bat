@@ -1,5 +1,5 @@
-set version=2.3.20
-set versionNew=2.3.21
+set version=2.3.26
+set versionNew=2.3.27
 del %~dp0VelaAgent.Linux.%version%.zip
 cd "..\VelaAgent"
 dotnet publish -c release -o bin\Release\agent_linuxpublish --self-contained true --runtime linux-x64
@@ -8,5 +8,6 @@ copy /Y %~dp0VelaAgent.Linux.%version%.zip "C:\Users\89687\OneDrive - MUSE\JMS\V
 @echo wait to upload complted
 pause
 ren "C:\Users\89687\OneDrive - MUSE\JMS\VelaAgent.Linux.%version%.zip" VelaAgent.Linux.%versionNew%.zip
+ren %~dp0VelaAgent.Linux.%version%.zip VelaAgent.Linux.%versionNew%.zip
 @echo modify name successed
 pause

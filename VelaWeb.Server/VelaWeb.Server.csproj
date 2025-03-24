@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	  <NoWarn>$(NoWarn);NU1605</NoWarn>
 	  <ServerGarbageCollection>false</ServerGarbageCollection>
-	  <Version>2.8.8</Version>
+	  <Version>2.8.11</Version>
   </PropertyGroup>
 
   <ItemGroup>

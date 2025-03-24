@@ -39,6 +39,10 @@ namespace VelaAgent.DBModels.Dtos
                 }
             }
         }
+
+        public string LogPath { get; set; }
+        public double LogMaxSize { get; set; }
+
         string? _ExcludeFiles;
         /// <summary>
         /// 排除的文件

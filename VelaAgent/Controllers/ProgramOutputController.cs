@@ -51,7 +51,7 @@ namespace VelaAgent.Controllers
 
                     checkState();
 
-                    await programOutput.StartOutput(this, preline);
+                    await programOutput.StartOutput(keepAliveObj.Project , this, preline);
 
                     if (_websocket.State == WebSocketState.Open)
                     {

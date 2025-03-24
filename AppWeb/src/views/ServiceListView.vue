@@ -305,7 +305,7 @@ const addClick = () => {
         "User": null, "id": null, "Name": "", "ExcludeFiles": "", "RunCmd": null, "PublishPath": null,
         "ConfigFiles": "", "GitUrl": "", "BranchName": "", "PublishMode": 0, "IsNeedBuild": false, "ProgramPath": "", "BuildCmd": "",
         "Status": 0, "CpuRate": null, "MemoryRate": null, "GitUserName": "", "GitPwd": "", "BuildPath": "", "Guid": "", "ProcessId": null,
-        "GitRemote": "origin", "IsHostNetwork": false, MemoryLimit: "", DeleteNoUseFiles: true,
+        "GitRemote": "origin", "IsHostNetwork": false, MemoryLimit: "", DeleteNoUseFiles: true,LogPath:null,LogMaxSize:500,
         "CodePath": "", "Desc": null, "UserId": null, RunType: 1
     });
 
@@ -1304,6 +1304,22 @@ const okImportClick = async () => {
                                         </div>
 
 
+                                    </div>
+                                </div>
+
+                                <div class="form-group" v-if="editingModel.RunType == 1">
+                                    <label class="col-sm-3 control-label form-label">控制台日志路径</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" class="form-control" v-model="editingModel.LogPath">
+
+                                    </div>
+                                </div>
+
+                                <div class="form-group" v-if="editingModel.RunType == 1">
+                                    <label class="col-sm-3 control-label form-label">日志最大限制</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" class="form-control" v-model="editingModel.LogMaxSize">
+                                        <span id="helpBlock" class="help-block">单位:M</span>
                                     </div>
                                 </div>
 

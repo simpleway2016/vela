@@ -246,8 +246,9 @@ const sendNothing = () => {
 
 const preLineNumClick = (value: any) => {
     setPreLineNum.value = value;
-
+    
     viewProgramSocket.stop();
+    term.clear();
     viewProgramSocket.Url = `/ViewProgramOutput?guid=${props.modelValue}&preline=${setPreLineNum.value}`;
     //datas.value.splice(0, datas.value.length);
     (<any>viewProgramSocket)._toResetUrl = true;
@@ -311,7 +312,7 @@ const termClick = () => {
                 <div class="btn-group" role="group" aria-label="...">
                     <button class="btn btn-light" @click="publish"><i class="fa fa-cloud-upload"></i>立刻发布</button>
                     <button class="btn btn-light" @click="stopPublish"><i class="fa fa-times-circle"></i>中断发布</button>
-                    <button v-if="(props.project.RunType&2)==2" class="btn btn-light"
+                    <button class="btn btn-light"
                         :class="{ actived: isViewingProgramOutput }" @click="viewProgramOutput"><i
                             class="fa fa-desktop"></i>查看程序控制台输出</button>
                     <a @click="close" class="btn btn-light"><i class="fa fa-close"></i>关闭</a>

@@ -1,5 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Buffers;
 using System.Diagnostics;
+using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using VelaAgent.DBModels;
 using VelaAgent.Infrastructures;
@@ -65,7 +68,7 @@ namespace VelaAgent.Infrastructures.ProjectRunners
                 return;
             }
             _logger?.LogDebug($"{Project.Name}进程退出, process id:{Project.ProcessId}");
-           
+
             using var db = new SysDBContext();
             this.Project = db.Project.FirstOrDefault(m => m.Guid == Project.Guid);
             Project.ProcessId = null;
@@ -76,17 +79,112 @@ namespace VelaAgent.Infrastructures.ProjectRunners
                 _process?.Dispose();
                 _process = null;
 
-                if(Project.IsStopped == false)
+                if (Project.IsStopped == false)
                 {
                     Thread.Sleep(1000);
                     Start();
                 }
-                
+
             }
             else
             {
                 _process?.Dispose();
                 _process = null;
+            }
+        }
+
+        async Task WriteLog(Process process)
+        {
+            var buffer = ArrayPool<byte>.Shared.Rent(4096);
+            FileStream fs = null;
+            try
+            {
+                var path = Path.Combine(Global.AppConfig.Current.PublishRootPath, this.Project.Name , this.Project.LogPath);
+                var maxSize = Project.LogMaxSize.GetValueOrDefault() * 1024 * 1024;
+
+                fs = File.Exists(path) ? new FileStream(path, FileMode.Open, FileAccess.Write, FileShare.ReadWrite) : new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+                //定位到文件末尾
+                fs.Seek(0, SeekOrigin.End);
+
+                while (true)
+                {                    
+                    var count = await process.StandardOutput.BaseStream.ReadAsync(buffer,0,buffer.Length);
+                    if (count > 0)
+                    {
+                        await fs.WriteAsync(buffer , 0 , count);
+                        await fs.FlushAsync();
+                        if (maxSize > 0 && fs.Length > maxSize)
+                        {
+                            fs.Dispose();
+                            File.Delete(path);
+                            fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+
+                        }
+                    }
+                    if (process.HasExited)
+                    {
+                        break;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+            finally
+            {
+                fs?.Dispose();
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
+        }
+
+        async Task WriteErrorLog(Process process)
+        {
+           
+            FileStream fs = null;
+            var buffer = ArrayPool<byte>.Shared.Rent(4096);
+            try
+            {
+                var maxSize = Project.LogMaxSize.GetValueOrDefault() * 1024 * 1024;
+                var logpath = Path.Combine(Global.AppConfig.Current.PublishRootPath, this.Project.Name, this.Project.LogPath);
+                var path = $"{logpath}.err";
+
+                while (true)
+                {
+                    var count = await process.StandardError.BaseStream.ReadAsync(buffer, 0, buffer.Length);
+                    if (count > 0)
+                    {
+                        if(fs == null)
+                        {                          
+                            //如果文件已存在，则不再创建，打开继续追加
+                            fs = File.Exists(path) ? new FileStream(path , FileMode.Open , FileAccess.Write , FileShare.ReadWrite) : new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+                            //定位到文件末尾
+                            fs.Seek(0, SeekOrigin.End);
+                        }
+                        await fs.WriteAsync(buffer, 0, count);
+                        await fs.FlushAsync();
+                        if(maxSize > 0 && fs.Length > maxSize)
+                        {
+                            fs.Dispose();
+                            File.Delete(path);
+                            fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+
+                        }
+                    }
+                    if (process.HasExited)
+                    {
+                        break;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+            finally
+            {
+                fs?.Dispose();
+                ArrayPool<byte>.Shared.Return(buffer);
             }
         }
 
@@ -125,7 +223,14 @@ namespace VelaAgent.Infrastructures.ProjectRunners
 
                 try
                 {
-                    _process = _cmdRunner.RunNoOutput(publishPath, Project.RunCmd);
+                    if (string.IsNullOrEmpty(Project.LogPath))
+                    {
+                        _process = _cmdRunner.RunNoOutput(publishPath, Project.RunCmd);
+                    }
+                    else
+                    {
+                        _process = _cmdRunner.Run(publishPath, Project.RunCmd);
+                    }
                     _process.WaitForExit(1000);
 
                     _logger?.LogDebug($"{Project.Name}进程启动, process id:{_process.Id} cmd:{Project.RunCmd}");
@@ -143,6 +248,12 @@ namespace VelaAgent.Infrastructures.ProjectRunners
                     Project.ProcessId = _process.Id;
                     Project.IsStopped = false;
                     await db.UpdateAsync(Project);
+
+                    if (!string.IsNullOrEmpty(Project.LogPath))
+                    {
+                        _ = WriteLog(_process);
+                        _ = WriteErrorLog(_process);
+                    }
                 }
                 finally
                 {

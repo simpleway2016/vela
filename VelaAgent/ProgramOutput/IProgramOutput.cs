@@ -1,9 +1,10 @@
-﻿using VelaAgent.Infrastructures;
+﻿using VelaAgent.DBModels;
+using VelaAgent.Infrastructures;
 
 namespace VelaAgent.ProgramOutput
 {
     public interface IProgramOutput:IDisposable
     {
-        Task StartOutput(IInfoOutput infoOutput,int preLines);
+        Task StartOutput(Project project, IInfoOutput infoOutput,int preLines);
     }
 }

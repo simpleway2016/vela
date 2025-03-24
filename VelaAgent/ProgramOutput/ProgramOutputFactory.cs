@@ -15,6 +15,10 @@ namespace VelaAgent.ProgramOutput
             {
                 return new DockerProgramOutput(keepProcessAlive.Project.DockerContainerId);
             }
+            else if (keepProcessAlive.Project.RunType == DBModels.Project_RunTypeEnum.Program)
+            {
+                return new ProgramOutput();
+            }
             return null;
         }
     }
