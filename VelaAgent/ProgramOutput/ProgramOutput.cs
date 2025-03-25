@@ -94,7 +94,7 @@ namespace VelaAgent.ProgramOutput
                         break;
                     }
 
-                    await infoOutput.Output(line);
+                    await infoOutput.Output($"\x1b[38;5;210m{line}\x1b[0m");
                 }
             }
             catch
