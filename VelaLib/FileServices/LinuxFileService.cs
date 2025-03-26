@@ -52,17 +52,20 @@ namespace VelaLib
 
         async Task ChmodFolderAll(string folder, string action, StringBuilder errs)
         {
-           
-            var subFolders = Directory.GetDirectories(folder);
-            foreach (var subFolder in subFolders) {
-                await ChmodFolderAll(subFolder, action, errs);
-            }
+           //防止文件太多，注释这里
+            //var subFolders = Directory.GetDirectories(folder);
+            //foreach (var subFolder in subFolders) {
+            //    await ChmodFolderAll(subFolder, action, errs);
+            //}
 
             var files = Directory.GetFiles(folder);
             foreach (var file in files) {
                 try
                 {
-                    await Chmod(file, action);
+                    if(string.IsNullOrEmpty(Path.GetExtension(file)))
+                    {
+                        await Chmod(file, action);
+                    }                    
                 }
                 catch (Exception ex)
                 {
