@@ -55,11 +55,6 @@ namespace VelaAgent.ProgramOutput
             }
             _process = _cmdRunner.Run(null, $"tail -n {preLines} -f \"{logpath}\"");
 
-            if (File.Exists($"{logpath}.err"))
-            {
-                outputError(project, infoOutput, preLines);
-            }
-
             string line;
             while (true)
             {
@@ -78,29 +73,6 @@ namespace VelaAgent.ProgramOutput
             _process = null;
         }
 
-        async void outputError(Project project, IInfoOutput infoOutput, int preLines)
-        {
-            try
-            {
-                var logpath = Path.Combine(Global.AppConfig.Current.PublishRootPath, project.Name, project.LogPath);
-                _process_err = _cmdRunner.Run(null, $"tail -n {preLines} -f \"{logpath}.err\"");
-
-                string line;
-                while (true)
-                {
-                    line = await _process_err.StandardOutput.ReadLineAsync();
-                    if (line == null)
-                    {
-                        break;
-                    }
-
-                    await infoOutput.Output($"\x1b[38;5;210m{line}\x1b[0m");
-                }
-            }
-            catch
-            {
-
-            }
-        }
+       
     }
 }
