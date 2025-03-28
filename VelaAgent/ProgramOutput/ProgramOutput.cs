@@ -38,7 +38,7 @@ namespace VelaAgent.ProgramOutput
             string[] lines = new string[linesToRead];
             using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
-                long readedPos;//记录已经收录的行的坐标
+                long readedPos;//记录上一次已经分析到哪个位置了
                 readedPos = fs.Length;
 
 
@@ -51,6 +51,7 @@ namespace VelaAgent.ProgramOutput
                         fs.Position = pos;
                         var readlen = (int)(readedPos - pos);
 
+                        //记录采用内容的起点位置
                         long startpos = readedPos;
                         var readed = await fs.ReadAsync(bs, 0, readlen);
                         var readedLines = Encoding.UTF8.GetString(bs, 0, readed).Split('\n').Select(m => m.TrimEnd()).ToArray();
