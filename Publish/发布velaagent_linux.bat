@@ -1,5 +1,5 @@
-set version=2.3.31
-set versionNew=2.3.32
+set version=2.3.32
+set versionNew=2.3.33
 del %~dp0VelaAgent.Linux.%version%.zip
 cd "..\VelaAgent"
 dotnet publish -c release -o bin\Release\agent_linuxpublish --self-contained true --runtime linux-x64
