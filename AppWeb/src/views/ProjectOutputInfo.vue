@@ -192,6 +192,11 @@ const showLen = (length: number) => {
     return k + "K";
 }
 const close = () => {
+    if (viewProgramSocket) {
+        viewProgramSocket.stop();
+        viewProgramSocket = <any>undefined;
+    }
+    
     emit("update:modelValue", "");
 }
 
