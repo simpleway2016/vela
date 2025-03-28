@@ -143,7 +143,8 @@ namespace VelaAgent.ProgramOutput
                     line = await sr.ReadLineAsync();
                     if (line == null)
                     {
-                        break;
+                        await Task.Delay(1000);
+                        continue;
                     }
 
                     await infoOutput.Output(line);
