@@ -12,12 +12,12 @@ namespace VelaAgent.AutoRun
         {
             _logger = logger;
         }
-        public void Run()
+        public async Task RunAsync()
         {
-            new Thread(runOnBackground).Start();
+            await runOnBackground();
         }
 
-        void runOnBackground()
+        async Task runOnBackground()
         {
             while (true)
             {
@@ -34,7 +34,7 @@ namespace VelaAgent.AutoRun
                 {
                     _logger.LogError(ex, "");
                 }
-                Thread.Sleep(60000);
+                 await Task.Delay(60000);
             }
         }
 

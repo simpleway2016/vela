@@ -211,7 +211,7 @@ namespace VelaWeb
             Global.Init(app.Services);
 
 
-            app.Services.GetRequiredService<DeleteLogs>().Start();
+            _ = app.Services.GetRequiredService<DeleteLogs>().StartAsync();
             app.Services.GetRequiredService<AgentsManager>().Init();
             app.Services.GetRequiredService<ProjectCenter>().Init();
             app.Services.GetRequiredService<AlarmManager>().Init();

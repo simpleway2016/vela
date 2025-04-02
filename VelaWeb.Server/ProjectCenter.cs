@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System;
 using VelaLib;
 using VelaWeb.Server.Git;
+using System.Threading.Tasks;
 
 namespace VelaWeb.Server
 {
@@ -51,7 +52,7 @@ namespace VelaWeb.Server
 
             foreach (var item in agents)
             {
-                new Thread(() => { loadServiceListByServer(item.ToJsonString().FromJson<AgentModel>()); }).Start();
+                _ = loadServiceListByServerAsync(item.ToJsonString().FromJson<AgentModel>());
             }
 
         }
@@ -91,7 +92,7 @@ namespace VelaWeb.Server
         }
 
 
-        async void loadServiceListByServer(AgentModel agentModel)
+        async Task loadServiceListByServerAsync(AgentModel agentModel)
         {
             while (true)
             {
@@ -127,7 +128,7 @@ namespace VelaWeb.Server
         }
         public void OnNewAgent(Agent agent)
         {
-            new Thread(() => { loadServiceListByServer(agent.ToJsonString().FromJson<AgentModel>()); }).Start();
+            _ = loadServiceListByServerAsync(agent.ToJsonString().FromJson<AgentModel>());
         }
         public void OnRemoveAgent(long agentId)
         {
@@ -197,11 +198,11 @@ namespace VelaWeb.Server
         /// 刷新project model的信息
         /// </summary>
         /// <param name="projectModel"></param>
-        public void RefreshProject(ProjectModel projectModel)
+        public async Task RefreshProjectAsync(ProjectModel projectModel)
         {
             if (projectModel.OwnerServer != null)
             {
-                loadServiceListByServer(projectModel.OwnerServer);
+                await loadServiceListByServerAsync(projectModel.OwnerServer);
             }
         }
 

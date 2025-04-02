@@ -1,4 +1,5 @@
-﻿using VelaLib;
+﻿using System.Threading.Tasks;
+using VelaLib;
 using VelaWeb.Server.DBModels;
 
 namespace VelaWeb.Server.AutoRun
@@ -11,24 +12,22 @@ namespace VelaWeb.Server.AutoRun
         {
             _logger = logger;
         }
-        public void Start()
+        public async Task StartAsync()
         {
-            new Thread(() => {
-                while (true)
+            while (true)
+            {
+                await Task.Delay(600000);
+                try
                 {
-                    Thread.Sleep(600000);
-                    try
-                    {
-                        var time = DateTime.Now.AddDays(-30);
-                        using var db = new SysDBContext();
-                        db.Delete<Logs>(m=>m.Time < time);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "");
-                    }
+                    var time = DateTime.Now.AddDays(-30);
+                    using var db = new SysDBContext();
+                    db.Delete<Logs>(m => m.Time < time);
                 }
-            }).Start();
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "");
+                }
+            }
         }
     }
 }

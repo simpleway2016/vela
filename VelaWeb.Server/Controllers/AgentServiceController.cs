@@ -468,7 +468,7 @@ namespace VelaWeb.Server.Controllers
             }
 
             _projectCenter.OnProjectUpdate(project);
-            _projectCenter.RefreshProject(project);
+            await _projectCenter.RefreshProjectAsync(project);
 
             await _db.InsertAsync(new Logs
             {
@@ -578,11 +578,11 @@ namespace VelaWeb.Server.Controllers
 
             _blackList.ClearError(key);
 
-              var claimsIdentity = new ClaimsIdentity(new Claim[]
-        {
+            var claimsIdentity = new ClaimsIdentity(new Claim[]
+      {
                 new Claim("Content", $"{userinfo.id},{userinfo.Flag}"),
                 new Claim(ClaimTypes.Role , userinfo.Role.ToString()),
-        }, "JMS.Token"); ;
+      }, "JMS.Token"); ;
 
             this.User.AddIdentity(claimsIdentity);
         }

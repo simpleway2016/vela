@@ -159,7 +159,7 @@ namespace VelaAgent
             var logger = app.Services.GetService<ILogger<Program>>();
 
             app.Services.GetRequiredService<KeepProcessAliveFactory>().Init();
-            app.Services.GetRequiredService<DeleteBackups>().Run();
+            _ = app.Services.GetRequiredService<DeleteBackups>().RunAsync();
 
             app.UseJmsFileUploader();
             app.UseHttpsRedirection();
