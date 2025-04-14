@@ -210,6 +210,7 @@ namespace VelaAgent.Controllers
                 data.ChangedProperties.Remove(nameof(project.ProcessId));
                 data.ChangedProperties.Remove(nameof(project.DockerContainerId));
                 data.ChangedProperties.Remove(nameof(project.IsStopped));
+                data.ChangedProperties.Remove(nameof(project.IsFirstUpload));
 
                 var changeitem = data.ChangedProperties.Where(m => m.Key == nameof(data.RunType)).Select(m => m.Value).FirstOrDefault();
 
