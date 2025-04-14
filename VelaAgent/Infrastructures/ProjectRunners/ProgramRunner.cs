@@ -164,7 +164,7 @@ namespace VelaAgent.Infrastructures.ProjectRunners
                             }
                         }
                     }
-                    if (process.HasExited)
+                    if (line == null && process.HasExited)
                     {
                         break;
                     }
@@ -225,6 +225,11 @@ namespace VelaAgent.Infrastructures.ProjectRunners
                     _logger?.LogDebug($"{Project.Name}进程启动, process id:{_process.Id} cmd:{Project.RunCmd}");
                     if (_process.HasExited)
                     {
+                        if (!string.IsNullOrEmpty(Project.LogPath))
+                        {
+                            await WriteLog(_process);
+                        }
+                          
                         _logger?.LogDebug($"{Project.Name}进程 process id:{_process.Id} 已退出");
                         if (_process.ExitCode != 0)
                         {
