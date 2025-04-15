@@ -62,10 +62,7 @@ namespace VelaLib
             foreach (var file in files) {
                 try
                 {
-                    if(string.IsNullOrEmpty(Path.GetExtension(file)))
-                    {
-                        await Chmod(file, action);
-                    }                    
+                    await Chmod(file, action);
                 }
                 catch (Exception ex)
                 {
