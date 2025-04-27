@@ -48,7 +48,7 @@ namespace VelaWeb
             ThreadPool.SetMinThreads(500, 500);
 
             var builder = WebApplication.CreateBuilder(args);
-
+            Global.Configuration = builder.Configuration;
             if (!string.IsNullOrWhiteSpace(builder.Configuration["Https:Cert"]))
             {
                 var uri = new Uri(builder.Configuration["Urls"].Replace("*", "a.com"));

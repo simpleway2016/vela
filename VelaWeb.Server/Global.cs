@@ -6,6 +6,7 @@ namespace VelaWeb
 {
     public class Global
     {
+        public static IConfiguration Configuration { get;  set; }
         public static string AppServiceName { get;set; }
         public static IServiceProvider ServiceProvider { get; private set; }
         public static string ClientCertHash { get; private set; }
