@@ -352,7 +352,7 @@ namespace VelaWeb.Server
             if(changeFiles != null && runGuid == null)
             {
                 //需要去掉已经手动停止的项目
-                projectModels = projectModels.Where(m => m.IsStopped == false).ToArray();
+                projectModels = projectModels.Where(m => m.IsStopped == false || (m.RunType == VelaAgent.DBModels.Dtos.Project_RunTypeEnum.Program && string.IsNullOrWhiteSpace(m.RunCmd))).ToArray();
             }
 
             if (runGuid != null)
