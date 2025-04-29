@@ -539,6 +539,7 @@ namespace VelaWeb.Server
                     {
                         await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "当前为手动启动模式，需要手动点击【立刻发布】", false);
                     }
+                    projectModel.IsStopped = false;
 
                 }
             }

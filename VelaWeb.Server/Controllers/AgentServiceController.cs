@@ -314,6 +314,10 @@ namespace VelaWeb.Server.Controllers
             project.GitUrl = project.GitUrl?.Trim();
             project.GitUserName = project.GitUserName?.Trim();
             project.GitRemote = project.GitRemote?.Trim();
+            project.IsStopped = false;
+            project.IsFirstUpload = true;
+            project.ProcessId = null;
+            project.DockerContainerId = null;
 
             //if (string.IsNullOrEmpty(project.GitUrl) || string.IsNullOrEmpty(project.BranchName) || string.IsNullOrEmpty(project.GitRemote))
             //{
@@ -376,7 +380,10 @@ namespace VelaWeb.Server.Controllers
             project.GitUrl = project.GitUrl?.Trim();
             project.GitUserName = project.GitUserName?.Trim();
             project.GitRemote = project.GitRemote?.Trim();
-
+            project.IsStopped = false;
+            project.IsFirstUpload = true;
+            project.ProcessId = null;
+            project.DockerContainerId = null;
 
             var role = this.User.FindFirstValue(ClaimTypes.Role);
 
@@ -744,6 +751,7 @@ namespace VelaWeb.Server.Controllers
                 var msg = await ret.Content.ReadAsStringAsync();
                 throw new ServiceException(msg);
             }
+            project.IsStopped = false;
             await _db.InsertAsync(new Logs
             {
                 UserId = this.UserId,
@@ -792,6 +800,7 @@ namespace VelaWeb.Server.Controllers
                 Time = DateTime.UtcNow,
                 Detail = project.Guid + "\r\n" + project.Name
             });
+            project.IsStopped = true;
         }
 
         /// <summary>
