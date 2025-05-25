@@ -543,6 +543,21 @@ namespace VelaWeb.Server
 
                 }
             }
+            catch(LibGit2Sharp.NativeException ex)
+            {
+                foreach (var projectModel in projectModels)
+                {
+                    projectModel.Status = null;
+                    projectModel.Error = "拉取出错";
+                    await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "拉取出错，" + ex.Message, false);
+                }
+
+                needReclone = true;
+                foreach (var projectModel in projectModels)
+                {
+                    await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "准备重新克隆", false);
+                }
+            }
             catch (Exception ex)
             {
                 while (ex.InnerException != null)
@@ -560,7 +575,17 @@ namespace VelaWeb.Server
             {
                 if (needReclone)
                 {
-                    gitWorker.ReClone();
+                    try
+                    {
+                        gitWorker.ReClone();
+                    }
+                    catch (Exception ex)
+                    {
+                        foreach (var projectModel in projectModels)
+                        {
+                            await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel,  ex.Message, false);
+                        }
+                    }
                 }
                 gitWorker.Continue();
             }
