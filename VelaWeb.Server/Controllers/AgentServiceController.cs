@@ -226,7 +226,10 @@ namespace VelaWeb.Server.Controllers
             {
                 allProjects = allProjects.Where(m => m.Name.Contains(search, StringComparison.OrdinalIgnoreCase)
                 || m.Desc?.Contains(search, StringComparison.OrdinalIgnoreCase) == true
-                || m.BuildCmd?.Contains(search, StringComparison.OrdinalIgnoreCase) == true).ToArray();
+                || m.BuildCmd?.Contains(search, StringComparison.OrdinalIgnoreCase) == true
+                || m.GitUrl?.Contains(search,StringComparison.OrdinalIgnoreCase) == true
+                || m.PublishPath?.Contains(search, StringComparison.OrdinalIgnoreCase) == true
+                || m.ProgramPath?.Contains(search, StringComparison.OrdinalIgnoreCase) == true).ToArray();
             }
             var list = allProjects.ToJsonString().FromJson<ProjectModel[]>();
             if (this.User.FindFirstValue(ClaimTypes.Role) != "Admin")
