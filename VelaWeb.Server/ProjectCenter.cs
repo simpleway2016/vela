@@ -566,8 +566,17 @@ namespace VelaWeb.Server
                 foreach (var projectModel in projectModels)
                 {
                     projectModel.Status = null;
-                    projectModel.Error = "拉取出错";
-                    await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "拉取出错，" + ex.Message, false);
+                    projectModel.Error = "拉取异常";
+                    await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "拉取异常，" + ex.Message, false);
+                }
+
+                if(ex.Message.Contains("corrupted loose reference file"))
+                {
+                    needReclone = true;
+                    foreach (var projectModel in projectModels)
+                    {
+                        await ProjectBuildInfoOutput.OutputBuildInfoAsync(projectModel, "准备重新克隆", false);
+                    }
                 }
 
             }
