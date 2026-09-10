@@ -68,6 +68,8 @@ namespace VelaAgent
 
             builder.WebHost.ConfigureKestrel(options =>
             {
+                var maxSize = Global.Configuration.GetSection("MaxRequestBodySize").Get<long?>();
+                options.Limits.MaxRequestBodySize = maxSize;   // é»˜è®¤ä¸é™åˆ¶
                 options.Listen(IPAddress.Any, builder.Configuration.GetSection("Port").Get<int>(), listenOptions =>
                 {
                     var serverCertificate = new X509Certificate2(pfxFilePath, "123456");
@@ -147,7 +149,7 @@ namespace VelaAgent
                 services.AddSingleton<IProcessService, LinuxProcessService>();
             }
 
-            //¹Ø±Õ²ÎÊı×Ô¶¯Ğ£Ñé
+            //ï¿½Ø±Õ²ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½Ğ£ï¿½ï¿½
             services.Configure<ApiBehaviorOptions>((o) =>
             {
                 o.SuppressModelStateInvalidFilter = true;
