@@ -61,7 +61,7 @@ namespace VelaAgent
             string pfxFilePath = "./server.pfx";
             if (File.Exists(pfxFilePath) == false)
             {
-                new DefaultCertificateService().CreateCertificate("VelaAgent", 100, pfxFilePath, "123456");
+                new DefaultCertificateService().CreateCertificate("cert", 100, pfxFilePath, "123456");
             }
             var builder = WebApplication.CreateBuilder(args);
             Global.Configuration = builder.Configuration;
