@@ -20,6 +20,7 @@ namespace VelaWeb.Server.Controllers
     [Route("[controller]/[action]")]
     public class UserController : AuthController
     {
+        private static readonly object BindingLock = new();
         private readonly SysDBContext _db;
         private readonly TokenClient _tokenClient;
         private readonly BlackList _blackList;
@@ -66,7 +67,7 @@ namespace VelaWeb.Server.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        public async Task<string> Login([FromBody] LoginRequestModel request)
+        public async Task<object> Login([FromBody] LoginRequestModel request)
         {
             var key = request.Name.Trim().ToLower();
             if (!_blackList.CheckBlackList(key))
@@ -86,6 +87,38 @@ namespace VelaWeb.Server.Controllers
                 throw new ServiceException("用户名、密码错误");
             }
 
+            if (Global.Configuration.GetValue<bool>("UseGoogleCode"))
+            {
+                Response.Headers.CacheControl = "no-store";
+                var pendingKey = $"google-binding:{userinfo.id}";
+                var secret = userinfo.GoogleCode;
+                var binding = string.IsNullOrWhiteSpace(secret);
+                if (binding)
+                {
+                    // Reuse the pending key until it expires; never trust a client supplied secret.
+                    lock (BindingLock)
+                    {
+                        if (!_memoryCache.TryGetValue(pendingKey, out secret))
+                        {
+                            secret = GoogleAuthenticator.CreateSecret();
+                            _memoryCache.Set(pendingKey, secret, TimeSpan.FromMinutes(10));
+                        }
+                    }
+                }
+                if (string.IsNullOrEmpty(request.GoogleCode))
+                    return new { RequiresGoogleCode = true, RequiresBinding = binding,
+                        Secret = binding ? secret : null,
+                        Title = Global.Configuration["GoogleCodeTitle"] ?? "Vela Web" };
+
+                if (!GoogleAuthenticator.Verify(secret!, request.GoogleCode))
+                {
+                    _blackList.MarkError(key);
+                    throw new ServiceException("谷歌验证码错误或已过期，请重试");
+                }
+                if (binding)
+                    userinfo.GoogleCode = secret;
+            }
+
             _blackList.ClearError(key);
             userinfo.Flag++;
             await _db.UpdateAsync(userinfo);
@@ -94,7 +127,7 @@ namespace VelaWeb.Server.Controllers
 #if DEBUG
             return _tokenClient.Build($"{userinfo.id},{userinfo.Flag}", userinfo.Role.ToString() , DateTime.Now.AddMinutes(10000));
 #else
-            return _tokenClient.Build($"{userinfo.id},{userinfo.Flag}" ,userinfo.Role.ToString(), DateTime.Now.AddMinutes(10));
+            return _tokenClient.Build($"{userinfo.id},{userinfo.Flag}" ,userinfo.Role.ToString(), DateTime.Now.AddMinutes(Global.Configuration.GetValue<int>("TokenKeyExpire", 1)));
 #endif
         }
 
@@ -125,7 +158,7 @@ namespace VelaWeb.Server.Controllers
 #if DEBUG
             data = _tokenClient.Build(data, role, DateTime.Now.AddMinutes(10000));
 #else
-            data = _tokenClient.Build(data, role,  DateTime.Now.AddMinutes(10));
+            data = _tokenClient.Build(data, role,  DateTime.Now.AddMinutes(Global.Configuration.GetValue<int>("TokenKeyExpire", 1)));
 #endif
             return new ContentResult { StatusCode = 200, Content = data };
         }
@@ -135,6 +168,7 @@ namespace VelaWeb.Server.Controllers
         {
             var userid = long.Parse(this.User.FindFirstValue("Content").Split(',')[0]);
             var ret = await _db.UserInfo.FirstOrDefaultAsync(m => m.id == userid);
+            ret.GoogleCode = null;
             ret.Password = typeof(UserController).Assembly.GetName().Version.ToString();
             ret.ChangedProperties.Clear();
             return ret;
@@ -166,6 +200,7 @@ namespace VelaWeb.Server.Controllers
             var users = await _db.UserInfo.ToArrayAsync();
             foreach( var user in users)
             {
+                user.GoogleCode = null;
                 user.Password = null;
                 user.ChangedProperties.Clear();
             }
@@ -177,6 +212,7 @@ namespace VelaWeb.Server.Controllers
         [HttpPost]
         public async Task<long> AddUser([FromBody]UserInfo requestModel)
         {
+            requestModel.GoogleCode = null;
             requestModel.Password = Way.Lib.AES.Encrypt(requestModel.Password, Global.SecretKey);
             requestModel.Name = requestModel.Name.Trim();
 
@@ -298,6 +334,7 @@ namespace VelaWeb.Server.Controllers
             var users = await _db.UserInfo.Where(m=>m.Role != UserInfo_RoleEnum.Admin).OrderBy(m=>m.Name).ToArrayAsync();
             foreach( var user in users)
             {
+                user.GoogleCode = null;
                 user.Password = null;
                 if(await _db.UserProjectPower.AnyAsync(m=>m.UserId == user.id && m.ProjectGuid == guid))
                 {
@@ -358,6 +395,7 @@ namespace VelaWeb.Server.Controllers
             var users = await _db.UserInfo.Where(m => m.Role != UserInfo_RoleEnum.Admin).OrderBy(m => m.Name).ToArrayAsync();
             foreach (var user in users)
             {
+                user.GoogleCode = null;
                 user.Password = null;
                 if (await _db.UserAgentPower.AnyAsync(m => m.UserId == user.id && m.AgentId == agentId))
                 {
