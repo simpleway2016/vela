@@ -28,7 +28,7 @@ namespace VelaWeb
 
             if (File.Exists(CertFilePath) == false)
             {
-                certificateService.CreateCertificate("VelaLibDesktop", 100, CertFilePath, "123456");
+                certificateService.CreateCertificate("cert", 100, CertFilePath, "123456");
             }
 
             ClientCert = new X509Certificate2(CertFilePath, "123456");
